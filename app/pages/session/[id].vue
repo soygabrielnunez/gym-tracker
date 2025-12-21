@@ -96,6 +96,15 @@
     message="Se guardará el progreso en el historial."
     @confirm="confirmFinish"
     @cancel="showFinishModal = false"
+
+  />
+
+  <InputModal
+    :show="showExerciseModal"
+    title="Nuevo Ejercicio"
+    placeholder="Ej: Press de Banca"
+    @confirm="confirmAddExercise"
+    @cancel="showExerciseModal = false"
   />
 </template>
 
@@ -162,8 +171,13 @@ const logSet = (exercise: any) => {
   // Maybe slight auto-increment logic or keep same
 }
 
+const showExerciseModal = ref(false)
+
 const addAdHocExercise = () => {
-  const name = prompt("Nombre del ejercicio")
+  showExerciseModal.value = true
+}
+
+const confirmAddExercise = (name: string) => {
   if (name && activeSession.value) {
     activeSession.value.exercises.push({
       name,
@@ -174,7 +188,10 @@ const addAdHocExercise = () => {
     // Switch focus to new exercise
     activeSession.value.currentExerciseIndex = activeSession.value.exercises.length - 1
   }
+  showExerciseModal.value = false
 }
+
+
 
 const finish = () => {
   showFinishModal.value = true
