@@ -1,24 +1,26 @@
 <template>
   <Teleport to="body">
-    <div v-if="show" class="modal-overlay" @click.self="$emit('cancel')">
-      <div class="modal-content">
-        <h3 class="h4 mb-4">{{ title }}</h3>
-        
-        <input 
+    <Transition name="modal">
+      <div v-if="show" class="modal-overlay" @click.self="$emit('cancel')">
+        <div class="modal-content">
+          <h3 class="modal-title">{{ title }}</h3>
+          
+          <input 
             ref="inputRef"
             v-model="inputValue" 
             type="text" 
             class="input mb-4" 
             :placeholder="placeholder"
             @keyup.enter="handleConfirm"
-        />
+          />
 
-        <div style="display:flex; gap:10px">
-          <button class="btn btn-secondary" @click="$emit('cancel')">Cancelar</button>
-          <button class="btn btn-primary" @click="handleConfirm">Confirmar</button>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" @click="$emit('cancel')">Cancelar</button>
+            <button class="btn btn-primary" @click="handleConfirm">Confirmar</button>
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -28,8 +30,8 @@ const props = defineProps({
   title: String,
   placeholder: String,
   initialValue: {
-      type: String,
-      default: ''
+    type: String,
+    default: ''
   }
 })
 
@@ -39,19 +41,18 @@ const inputValue = ref(props.initialValue)
 const inputRef = ref<HTMLInputElement | null>(null)
 
 watch(() => props.show, (newVal) => {
-    if (newVal) {
-        inputValue.value = props.initialValue
-        // Focus input on open
-        nextTick(() => {
-            inputRef.value?.focus()
-        })
-    }
+  if (newVal) {
+    inputValue.value = props.initialValue
+    nextTick(() => {
+      inputRef.value?.focus()
+    })
+  }
 })
 
 const handleConfirm = () => {
-    if (inputValue.value.trim()) {
-        emit('confirm', inputValue.value.trim())
-    }
+  if (inputValue.value.trim()) {
+    emit('confirm', inputValue.value.trim())
+  }
 }
 </script>
 
@@ -62,33 +63,96 @@ const handleConfirm = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: flex-end;
   z-index: 9999;
-  backdrop-filter: blur(5px);
-  animation: fadeIn 0.2s ease-out;
+  padding: var(--spacing-md);
+  padding-bottom: calc(var(--spacing-md) + var(--safe-area-bottom));
 }
 
 .modal-content {
-  background-color: #1e1e1e;
-  padding: 2rem;
-  border-radius: 16px;
-  width: 90%;
+  background: var(--color-surface-elevated);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  width: 100%;
   max-width: 400px;
-  border: 1px solid #333;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.modal-title {
+  margin: 0 0 var(--spacing-lg) 0;
+  color: white;
+  font-size: 1.25rem;
+  text-align: center;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.modal-actions .btn {
+  width: 100%;
+}
+
+/* Transition */
+.modal-enter-active {
+  transition: opacity 0.2s ease;
+}
+
+.modal-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active .modal-content {
+  animation: slideFromBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-leave-active .modal-content {
+  animation: slideToBottom 0.2s ease forwards;
+}
+
+@keyframes slideFromBottom {
+  from { 
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideToBottom {
+  from { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to { 
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Desktop: Center the modal */
+@media (min-width: 768px) {
+  .modal-overlay {
+    align-items: center;
+  }
+  
+  .modal-actions {
+    flex-direction: row;
+  }
 }
 </style>

@@ -11,16 +11,19 @@
 
 <style scoped>
 .header {
-  padding: 1rem 0;
-  margin-bottom: 2rem;
+  padding: var(--spacing-sm) 0;
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-target-min);
 }
 
 .logo {
   font-weight: 900;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: white;
   text-decoration: none;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.03em;
 }
 
 .highlight {
@@ -29,5 +32,7 @@
 
 .main-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 </style>

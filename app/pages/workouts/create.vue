@@ -1,50 +1,71 @@
 <template>
-  <div>
-    <NuxtLink to="/" class="btn btn-secondary mb-4" style="width:auto; display:inline-block">
-        ← Volver
-    </NuxtLink>
-    <h1 class="mb-4">Nueva Rutina</h1>
+  <div class="create-page">
+    <!-- Header -->
+    <header class="page-header mb-6">
+      <NuxtLink to="/" class="btn-back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Volver
+      </NuxtLink>
+    </header>
+
+    <h1 class="mb-6">Nueva Rutina</h1>
     
-    <div class="card mb-4">
+    <!-- Routine Name -->
+    <div class="card mb-6">
       <label class="label">Nombre de la Rutina</label>
       <input 
         v-model="name" 
-        class="input input-lg" 
+        class="input" 
         placeholder="Ej: Pierna Hipertrofia" 
         autofocus
       />
     </div>
 
-    <div class="mb-8">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
-        <h2 class="h3" style="margin:0">Ejercicios</h2>
+    <!-- Exercises -->
+    <section class="exercises-section mb-8">
+      <div class="section-header">
+        <h2 class="h3">Ejercicios</h2>
+        <span class="exercise-badge" v-if="exercises.length > 0">{{ exercises.length }}</span>
       </div>
 
-      <div v-if="exercises.length === 0" class="text-muted text-center" style="padding: 2rem 0; border: 1px dashed #333; border-radius: 12px">
-        Añade ejercicios a tu rutina
+      <div v-if="exercises.length === 0" class="empty-state mb-4">
+        <p>Añade ejercicios a tu rutina</p>
       </div>
 
-      <div v-else class="exercise-list">
-        <div v-for="(exercise, index) in exercises" :key="index" class="card mb-2" style="padding: 1rem">
-          <div style="display:flex; gap:10px">
-            <span style="color:var(--color-primary); font-weight:bold">{{ index + 1 }}.</span>
+      <div v-else class="row-stack mb-4">
+        <div v-for="(exercise, index) in exercises" :key="index" class="exercise-item card">
+          <div class="exercise-row">
+            <span class="exercise-index">{{ index + 1 }}.</span>
             <input 
               v-model="exercise.name" 
-              class="input" 
-              style="padding:0.5rem; background:transparent; border:none; border-bottom:1px solid #333; border-radius:0"
+              class="exercise-input" 
               placeholder="Nombre del ejercicio"
             />
-            <button @click="removeExercise(index)" style="background:none; border:none; color:#ff4444; font-size:1.5rem">×</button>
+            <button 
+              class="btn-icon danger" 
+              @click="removeExercise(index)"
+              title="Eliminar ejercicio"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6L6 18"/><path d="M6 6l12 12"/>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
       
-      <button class="btn btn-secondary mt-4" @click="addExercise" style="margin-top:1rem">
-        + Añadir Ejercicio
+      <button class="btn btn-secondary" @click="addExercise">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Añadir Ejercicio
       </button>
-    </div>
+    </section>
 
-    <div style="position:sticky; bottom:20px">
+    <!-- Sticky Save Button -->
+    <div class="sticky-bottom">
       <button class="btn btn-primary" @click="saveWorkout">
         Guardar Rutina
       </button>
@@ -81,10 +102,58 @@ const saveWorkout = () => {
 </script>
 
 <style scoped>
-.label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-  color: var(--color-text-dim);
+.create-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+}
+
+.exercises-section {
+  flex: 1;
+}
+
+/* Exercise Items */
+.exercise-item {
+  padding: var(--spacing-md);
+}
+
+.exercise-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.exercise-index {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  min-width: 24px;
+}
+
+.exercise-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  color: var(--color-text);
+  font-size: 1rem;
+  padding: var(--spacing-sm) 0;
+  min-height: var(--touch-target-min);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.exercise-input:focus {
+  border-color: var(--color-primary);
+}
+
+.exercise-input::placeholder {
+  color: var(--color-text-muted);
 }
 </style>

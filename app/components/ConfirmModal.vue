@@ -1,15 +1,17 @@
 <template>
   <Teleport to="body">
-    <div v-if="show" class="modal-overlay" @click.self="$emit('cancel')">
-      <div class="modal-content">
-        <h3 class="modal-title">{{ title }}</h3>
-        <p class="modal-message">{{ message }}</p>
-        <div class="modal-actions">
-          <button class="btn btn-secondary" @click="$emit('cancel')">Cancelar</button>
-          <button class="btn btn-primary" @click="$emit('confirm')">Confirmar</button>
+    <Transition name="modal">
+      <div v-if="show" class="modal-overlay" @click.self="$emit('cancel')">
+        <div class="modal-content">
+          <h3 class="modal-title">{{ title }}</h3>
+          <p class="modal-message">{{ message }}</p>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" @click="$emit('cancel')">Cancelar</button>
+            <button class="btn btn-primary" @click="$emit('confirm')">Confirmar</button>
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -28,54 +30,106 @@ defineEmits(['confirm', 'cancel'])
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease-out;
+  align-items: flex-end;
+  z-index: 9999;
+  padding: var(--spacing-md);
+  padding-bottom: calc(var(--spacing-md) + var(--safe-area-bottom));
 }
 
 .modal-content {
-  background: #1a1a1a;
-  padding: 2rem;
-  border-radius: 16px;
-  border: 1px solid #333;
-  width: 90%;
+  background: var(--color-surface-elevated);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  width: 100%;
   max-width: 400px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  animation: slideUp 0.2s ease-out;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
 }
 
 .modal-title {
-  margin-top: 0;
+  margin: 0 0 var(--spacing-sm) 0;
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   text-align: center;
 }
 
 .modal-message {
-  color: #ccc;
+  color: var(--color-text-secondary);
   text-align: center;
-  margin-bottom: 2rem;
+  margin: 0 0 var(--spacing-xl) 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .modal-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.modal-actions .btn {
+  width: 100%;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+/* Transition */
+.modal-enter-active {
+  transition: opacity 0.2s ease;
+}
+
+.modal-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active .modal-content {
+  animation: slideFromBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-leave-active .modal-content {
+  animation: slideToBottom 0.2s ease forwards;
+}
+
+@keyframes slideFromBottom {
+  from { 
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideToBottom {
+  from { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to { 
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Desktop: Center the modal */
+@media (min-width: 768px) {
+  .modal-overlay {
+    align-items: center;
+  }
+  
+  .modal-actions {
+    flex-direction: row;
+  }
 }
 </style>

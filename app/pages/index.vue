@@ -1,84 +1,106 @@
 <template>
   <div>
-    <h1 class="mb-4">Tu Gym <span style="color:white">Tracker</span></h1>
-    
-    <div class="card mb-8">
-      <h2 class="h3">Inicio Rápido</h2>
-      <button class="btn btn-primary mb-4" @click="startEmptyWorkout">
-        <span style="font-size:1.5rem; margin-right:8px">+</span>
-        Entrenar Ahora
-      </button>
-      <NuxtLink to="/workouts/create" class="btn btn-secondary">
-        Crear Nueva Rutina
-      </NuxtLink>
-    </div>
-
-    <div>
-      <h2 class="h3 mb-4">Mis Rutinas</h2>
-      <div v-if="workouts.length === 0" class="text-muted text-center" style="padding: 2rem 0">
-        No hay rutinas guardadas.
+    <!-- Hero Section -->
+    <section class="hero-section mb-8">
+      <h1 class="mb-4">Tu Gym <span class="text-white">Tracker</span></h1>
+      
+      <div class="card">
+        <button class="btn btn-primary btn-hero mb-4" @click="startEmptyWorkout">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Entrenar Ahora
+        </button>
+        <NuxtLink to="/workouts/create" class="btn btn-secondary">
+          Crear Nueva Rutina
+        </NuxtLink>
       </div>
-      <div v-else class="workout-list">
-        <div v-for="workout in workouts" :key="workout.id" class="card mb-4 workout-card" @click="startWorkout(workout.id)">
-          <div style="display:flex; align-items: flex-start; justify-content: space-between;">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex: 1">
-            <h3 style="margin:0">{{ workout.name }}</h3>
-            <span style="color:var(--color-primary); margin-right: 1rem">►</span>
+    </section>
+
+    <!-- Routines Section -->
+    <section class="mb-8">
+      <div class="section-header">
+        <h2 class="h3">Mis Rutinas</h2>
+        <span class="exercise-badge" v-if="workouts.length > 0">{{ workouts.length }}</span>
+      </div>
+      
+      <div v-if="workouts.length === 0" class="empty-state">
+        <p>No hay rutinas guardadas.</p>
+        <p class="text-muted" style="font-size: 0.875rem; margin: 0">Crea una rutina para empezar</p>
+      </div>
+      
+      <div v-else class="row-stack">
+        <div 
+          v-for="workout in workouts" 
+          :key="workout.id" 
+          class="card card-interactive workout-card"
+          @click="startWorkout(workout.id)"
+        >
+          <div class="row-between">
+            <div class="workout-info">
+              <h3 class="workout-name">{{ workout.name }}</h3>
+              <p class="workout-meta text-muted">{{ workout.exercises.length }} ejercicios</p>
+            </div>
+            <div class="workout-actions">
+              <span class="play-icon">►</span>
+              <button 
+                class="btn-icon danger" 
+                @click.stop="confirmDeleteWorkout(workout.id)"
+                title="Eliminar rutina"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
+              </button>
+            </div>
           </div>
-            <p class="text-muted" style="margin:0.5rem 0 0 0">
-              {{ workout.exercises.length }} ejercicios
-            </p>
-          </div>
-           <button 
-              class="btn-icon delete-btn routine-delete-btn" 
-              @click.stop="confirmDeleteWorkout(workout.id)"
-              title="Eliminar rutina"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 6h18"></path>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-              </svg>
-            </button>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="mt-8">
-      <h2 class="h3 mb-4">Historial Reciente</h2>
-      <div v-if="history.length === 0" class="text-muted text-center" style="padding: 2rem 0">
-        No hay entrenamientos completados.
+    <!-- History Section -->
+    <section>
+      <div class="section-header">
+        <h2 class="h3">Historial Reciente</h2>
+        <span class="exercise-badge" v-if="history.length > 0">{{ history.length }}</span>
       </div>
-      <div v-else class="history-list">
+      
+      <div v-if="history.length === 0" class="empty-state">
+        <p>No hay entrenamientos completados.</p>
+        <p class="text-muted" style="font-size: 0.875rem; margin: 0">Tu progreso aparecerá aquí</p>
+      </div>
+      
+      <div v-else class="row-stack">
         <div 
           v-for="session in history" 
           :key="session.id" 
-          class="card mb-4 history-card" 
+          class="card card-interactive history-card"
           @click="goToHistoryDetail(session.id)"
-          style="cursor: pointer"
         >
-          <div style="display:flex; justify-content:space-between; align-items:flex-start">
-            <div>
-              <h3 class="h4" style="margin:0 0 0.5rem 0">{{ session.name }}</h3>
-              <p class="text-muted" style="margin:0; font-size:0.9rem">
+          <div class="row-between">
+            <div class="history-info">
+              <h3 class="history-name">{{ session.name }}</h3>
+              <p class="history-meta text-muted">
                 {{ formatDate(session.endTime) }} • {{ session.exercises.length }} ejercicios
               </p>
             </div>
             <button 
-              class="btn-icon delete-btn" 
+              class="btn-icon danger" 
               @click.stop="confirmDelete(session.id)"
               title="Eliminar del historial"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 6h18"></path>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                <path d="M3 6h18"/>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
               </svg>
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 
   <ConfirmModal 
@@ -91,7 +113,6 @@
 </template>
 
 <script setup lang="ts">
-
 const { workouts, startSession } = useWorkouts()
 const router = useRouter()
 
@@ -142,6 +163,7 @@ const handleDelete = () => {
 const closeDeleteModal = () => {
   showDeleteModal.value = false
   sessionToDelete.value = null
+  workoutToDelete.value = null
 }
 
 const formatDate = (isoString: string) => {
@@ -159,64 +181,74 @@ const goToHistoryDetail = (sessionId: string) => {
 </script>
 
 <style scoped>
-.workout-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.text-white {
+  color: white;
 }
 
-.history-card {
-  transition: background-color 0.2s;
-}
-.history-card:hover {
-  background-color: #1a1a1a;
+.btn-hero {
+  font-size: 1.1rem;
+  padding: var(--spacing-lg);
 }
 
-.btn-icon {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  color: var(--color-text-muted);
-  border-radius: var(--radius-sm);
-  transition: all 0.2s ease;
+.btn-hero svg {
+  flex-shrink: 0;
+}
+
+/* Workout Cards */
+.workout-card {
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.workout-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.workout-name {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workout-meta {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.workout-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: var(--spacing-sm);
 }
 
-.btn-icon:hover {
-  background-color: rgba(255, 68, 68, 0.1);
-  color: #ff4444;
+.play-icon {
+  color: var(--color-primary);
+  font-size: 1.25rem;
 }
 
-.delete-btn {
-  opacity: 0;
-  transform: translateX(10px);
+/* History Cards */
+.history-card {
+  padding: var(--spacing-md) var(--spacing-lg);
 }
 
-.history-card:hover .delete-btn {
-  opacity: 1;
-  transform: translateX(0);
+.history-info {
+  flex: 1;
+  min-width: 0;
 }
 
-@media (max-width: 768px) {
-  .delete-btn {
-    opacity: 1;
-    transform: none;
-  }
+.history-name {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.workout-card {
-  transition: background-color 0.2s;
-  cursor: pointer;
-}
-.workout-card:hover {
-  background-color: #1a1a1a;
-}
-
-.workout-card:hover .routine-delete-btn {
-  opacity: 1;
-  transform: translateX(0);
+.history-meta {
+  margin: 0;
+  font-size: 0.85rem;
 }
 </style>

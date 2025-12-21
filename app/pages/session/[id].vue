@@ -1,42 +1,52 @@
 <template>
-  <div v-if="activeSession">
-    <div class="mb-4">
-       <NuxtLink to="/" class="btn btn-secondary" style="width:auto; display:inline-block">← Volver</NuxtLink>
-    </div>
-    <div class="header-actions mb-4">
-      <h1 style="font-size:1.5rem; margin:0">{{ activeSession.name }}</h1>
-      <button class="btn btn-sm" @click="finish" style="width:auto; padding:0.5rem 1rem; background:#ff4444; color:white">
+  <div v-if="activeSession" class="session-page">
+    <!-- Header -->
+    <header class="session-header">
+      <NuxtLink to="/" class="btn-back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Volver
+      </NuxtLink>
+      <button class="btn btn-sm btn-finish" @click="finish">
         Terminar
       </button>
+    </header>
+
+    <!-- Session Info & Timer -->
+    <div class="session-info mb-6">
+      <h1 class="session-title">{{ activeSession.name }}</h1>
+      <div class="timer-display">{{ formatTime(elapsed) }}</div>
     </div>
 
-    <div class="timer mb-4 text-center">
-      <span style="font-size:2rem; font-variant-numeric: tabular-nums">
-        {{ formatTime(elapsed) }}
-      </span>
-    </div>
-
+    <!-- Exercises -->
     <div class="exercises-container">
       <div v-for="(exercise, exIndex) in activeSession.exercises" :key="exIndex">
-        <!-- Active Exercise (Detailed View) -->
-        <div v-if="activeSession.currentExerciseIndex === exIndex" class="card mb-4 exercise-card">
-          <h2 class="h3">{{ exercise.name }}</h2>
+        
+        <!-- Active Exercise (Expanded) -->
+        <div v-if="activeSession.currentExerciseIndex === exIndex" class="exercise-active card mb-4">
+          <div class="exercise-header">
+            <h2 class="exercise-name">{{ exercise.name }}</h2>
+            <span class="exercise-badge">Activo</span>
+          </div>
           
-          <!-- Sets Done -->
-          <div v-if="exercise.sets.length > 0" class="sets-history mb-4">
+          <!-- Completed Sets -->
+          <div v-if="exercise.sets.length > 0" class="sets-list mb-4">
             <div v-for="(set, setIndex) in exercise.sets" :key="setIndex" class="set-row">
-              <span class="set-num">#{{ Number(setIndex) + 1 }}</span>
-              <span class="set-data">{{ set.weight > 0 ? `${set.weight}kg x` : '' }} {{ set.reps }} reps</span>
-              <div style="display:flex; align-items:center; gap:10px">
+              <div class="set-info">
+                <span class="set-number">#{{ Number(setIndex) + 1 }}</span>
+                <span class="set-data">
+                  {{ set.weight > 0 ? `${set.weight}kg × ` : '' }}{{ set.reps }} reps
+                </span>
+              </div>
+              <div class="set-actions">
                 <span class="set-check">✓</span>
                 <button 
-                  class="btn-icon-small" 
+                  class="btn-icon danger" 
                   @click="removeSet(exercise, Number(setIndex))"
-                  style="padding: 4px; border:none; background:none; cursor:pointer; color:#888"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 6L6 18"></path>
-                    <path d="M6 6l12 12"></path>
+                    <path d="M18 6L6 18"/><path d="M6 6l12 12"/>
                   </svg>
                 </button>
               </div>
@@ -45,8 +55,8 @@
 
           <!-- Add Set Form -->
           <div class="add-set-form">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px">
-              <div>
+            <div class="input-grid mb-4">
+              <div class="input-group">
                 <label class="label-sm">Kg</label>
                 <input 
                   type="number" 
@@ -57,7 +67,7 @@
                   @focus="($event.target as HTMLInputElement).select()"
                 />
               </div>
-              <div>
+              <div class="input-group">
                 <label class="label-sm">Reps</label>
                 <input 
                   type="number" 
@@ -69,49 +79,58 @@
                 />
               </div>
             </div>
-            <button 
-              class="btn btn-primary" 
-              @click="logSet(exercise)"
-              style="padding:1.5rem; font-size:1.2rem"
-            >
-              AÑADIR SERIE
+            <button class="btn btn-primary btn-add-set" @click="logSet(exercise)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              Añadir Serie
             </button>
           </div>
         </div>
 
-        <!-- Inactive Exercise (Compact View) -->
+        <!-- Inactive Exercise (Collapsed) -->
         <div 
           v-else 
-          class="card mb-2 exercise-summary" 
+          class="exercise-collapsed card card-interactive mb-2"
           @click="activeSession.currentExerciseIndex = exIndex"
-          style="cursor:pointer; padding: 1rem; opacity: 0.8"
         >
-          <div style="display:flex; justify-content:space-between; align-items:center">
-             <h3 class="h4 m-0" style="margin:0">{{ exercise.name }}</h3>
-             <span style="font-size:0.8rem; color:#888">Tocá para ver</span>
+          <div class="row-between">
+            <div class="collapsed-info">
+              <h3 class="collapsed-name">{{ exercise.name }}</h3>
+              <span class="collapsed-sets text-muted">
+                {{ exercise.sets.length }} series
+              </span>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="collapsed-chevron">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
           </div>
         </div>
       </div>
 
-      <!-- Add ad-hoc exercise button -->
-       <button class="btn btn-secondary mt-4 mb-8" @click="addAdHocExercise">
-        + Añadir Ejercicio Extra
+      <!-- Add Exercise Button -->
+      <button class="btn btn-secondary mt-4" @click="addAdHocExercise">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Añadir Ejercicio
       </button>
     </div>
   </div>
-  <div v-else class="text-center" style="padding:2rem">
-    <p>Cargando sesión...</p>
-    <NuxtLink to="/" class="btn btn-secondary">Volver</NuxtLink>
+
+  <!-- Loading State -->
+  <div v-else class="loading-state">
+    <p class="text-muted">Cargando sesión...</p>
+    <NuxtLink to="/" class="btn btn-secondary">Volver al Inicio</NuxtLink>
   </div>
 
-  
+  <!-- Modals -->
   <ConfirmModal 
     :show="showFinishModal"
     title="¿Terminar entrenamiento?"
     message="Se guardará el progreso en el historial."
     @confirm="confirmFinish"
     @cancel="showFinishModal = false"
-
   />
 
   <InputModal
@@ -135,12 +154,9 @@ let timerInterval: any = null
 
 onMounted(() => {
   if (!activeSession.value || activeSession.value.id !== route.params.id) {
-    // If state is lost or invalid URL, try to recover or redirect
-    // For now, redirect if no active session match
-    // router.push('/') // Commented out for dev safety
+    // Session not found - could redirect
   }
 
-  // Calculate elapsed
   const updateTimer = () => {
     if (activeSession.value) {
       const start = new Date(activeSession.value.startTime).getTime()
@@ -151,7 +167,7 @@ onMounted(() => {
   updateTimer()
   timerInterval = setInterval(updateTimer, 1000)
 
-  // Initialize inputs with smart defaults if exercises exist
+  // Initialize inputs with smart defaults
   if (activeSession.value) {
     if (typeof activeSession.value.currentExerciseIndex === 'undefined') {
        activeSession.value.currentExerciseIndex = 0
@@ -168,9 +184,10 @@ onUnmounted(() => {
 })
 
 const formatTime = (seconds: number) => {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0')
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0')
   const s = (seconds % 60).toString().padStart(2, '0')
-  return `${m}:${s}`
+  return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`
 }
 
 const logSet = (exercise: any) => {
@@ -181,9 +198,6 @@ const logSet = (exercise: any) => {
     reps: exercise.currentReps,
     completedAt: new Date().toISOString()
   })
-  
-  // Keep values for next set (Smart Defaults)
-  // Maybe slight auto-increment logic or keep same
 }
 
 const removeSet = (exercise: any, index: number) => {
@@ -204,13 +218,10 @@ const confirmAddExercise = (name: string) => {
       currentWeight: 0,
       currentReps: 10
     })
-    // Switch focus to new exercise
     activeSession.value.currentExerciseIndex = activeSession.value.exercises.length - 1
   }
   showExerciseModal.value = false
 }
-
-
 
 const finish = () => {
   showFinishModal.value = true
@@ -223,38 +234,163 @@ const confirmFinish = () => {
 </script>
 
 <style scoped>
-.header-actions {
+.session-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* Header */
+.session-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
-.timer {
-  color: var(--color-primary);
-  font-family: monospace;
+
+.btn-finish {
+  background-color: var(--color-danger);
+  color: white;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  min-height: var(--touch-target-min);
+  width: auto;
+  flex-shrink: 0;
 }
-.exercise-card {
+
+.btn-finish:active {
+  background-color: #e03d3d;
+}
+
+/* Session Info */
+.session-info {
+  text-align: center;
+}
+
+.session-title {
+  font-size: 1.25rem;
+  color: var(--color-text);
+  text-transform: none;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Exercises */
+.exercises-container {
+  flex: 1;
+}
+
+/* Active Exercise Card */
+.exercise-active {
   border-left: 4px solid var(--color-primary);
+  padding: var(--spacing-lg);
 }
+
+.exercise-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.exercise-name {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+/* Sets List */
+.sets-list {
+  border-radius: var(--radius-md);
+  background-color: rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
 .set-row {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem;
-  border-bottom: 1px solid #333;
-  color: var(--color-text-dim);
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
 }
+
+.set-row:last-child {
+  border-bottom: none;
+}
+
+.set-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.set-number {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  min-width: 32px;
+}
+
+.set-data {
+  color: var(--color-text-secondary);
+}
+
+.set-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
 .set-check {
   color: var(--color-primary);
+  font-weight: bold;
 }
-.input-giant {
-  font-size: 1.5rem;
-  text-align: center;
-  padding: 0.8rem;
+
+/* Add Set Form */
+.add-set-form {
+  margin-top: var(--spacing-lg);
 }
-.label-sm {
-  font-size: 0.8rem;
-  color: #888;
-  display: block;
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-add-set {
+  font-size: 1.1rem;
+  padding: var(--spacing-lg);
+}
+
+/* Collapsed Exercise */
+.exercise-collapsed {
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.collapsed-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.collapsed-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.collapsed-sets {
+  font-size: 0.85rem;
+}
+
+.collapsed-chevron {
+  color: var(--color-text-muted);
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-2xl);
   text-align: center;
-  margin-bottom: 4px;
 }
 </style>
