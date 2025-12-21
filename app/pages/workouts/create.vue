@@ -36,11 +36,12 @@
 
       <div v-else class="row-stack mb-4">
         <div v-for="(exercise, index) in exercises" :key="index" class="exercise-item card">
-          <div class="exercise-row">
-            <span class="exercise-index">{{ index + 1 }}.</span>
+          <!-- Exercise Header -->
+          <div class="exercise-header">
+            <span class="exercise-index">{{ index + 1 }}</span>
             <input 
               v-model="exercise.name" 
-              class="exercise-input" 
+              class="exercise-name-input" 
               placeholder="Nombre del ejercicio"
             />
             <button 
@@ -52,6 +53,41 @@
                 <path d="M18 6L6 18"/><path d="M6 6l12 12"/>
               </svg>
             </button>
+          </div>
+          
+          <!-- Target Values -->
+          <div class="exercise-targets">
+            <div class="target-field">
+              <label class="label-sm">Series</label>
+              <input 
+                type="number" 
+                inputmode="numeric"
+                v-model.number="exercise.targetSets" 
+                class="input target-input"
+                min="1"
+              />
+            </div>
+            <div class="target-field">
+              <label class="label-sm">Reps</label>
+              <input 
+                type="number" 
+                inputmode="numeric"
+                v-model.number="exercise.targetReps" 
+                class="input target-input"
+                min="1"
+              />
+            </div>
+            <div class="target-field">
+              <label class="label-sm">Kg</label>
+              <input 
+                type="number" 
+                inputmode="decimal"
+                v-model.number="exercise.targetWeight" 
+                class="input target-input"
+                min="0"
+                step="0.5"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -84,7 +120,8 @@ const addExercise = () => {
   exercises.value.push({
     name: '',
     targetSets: 3,
-    targetReps: 10
+    targetReps: 10,
+    targetWeight: 0
   })
 }
 
@@ -95,6 +132,10 @@ const removeExercise = (index: number) => {
 const saveWorkout = () => {
   if (!name.value.trim()) return alert('Ponle nombre a la rutina')
   if (exercises.value.length === 0) return alert('Añade al menos un ejercicio')
+  
+  // Validate exercise names
+  const hasEmptyNames = exercises.value.some(e => !e.name.trim())
+  if (hasEmptyNames) return alert('Todos los ejercicios deben tener nombre')
   
   createWorkout(name.value, exercises.value)
   router.push('/')
@@ -122,20 +163,28 @@ const saveWorkout = () => {
   padding: var(--spacing-md);
 }
 
-.exercise-row {
+.exercise-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
 .exercise-index {
-  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: var(--color-primary);
+  color: black;
   font-weight: 700;
-  font-size: 1.1rem;
-  min-width: 24px;
+  font-size: 0.875rem;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
 }
 
-.exercise-input {
+.exercise-name-input {
   flex: 1;
   background: transparent;
   border: none;
@@ -143,17 +192,51 @@ const saveWorkout = () => {
   border-radius: 0;
   color: var(--color-text);
   font-size: 1rem;
+  font-weight: 600;
   padding: var(--spacing-sm) 0;
   min-height: var(--touch-target-min);
   outline: none;
   transition: border-color var(--transition-fast);
 }
 
-.exercise-input:focus {
+.exercise-name-input:focus {
   border-color: var(--color-primary);
 }
 
-.exercise-input::placeholder {
+.exercise-name-input::placeholder {
   color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+/* Target Values Grid */
+.exercise-targets {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.target-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.target-input {
+  text-align: center;
+  padding: var(--spacing-sm);
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-height: var(--touch-target-min);
+}
+
+/* Override focus on number inputs to prevent zoom on iOS */
+.target-input::-webkit-outer-spin-button,
+.target-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.target-input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 </style>

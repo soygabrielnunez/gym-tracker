@@ -39,7 +39,9 @@
           <div class="row-between">
             <div class="workout-info">
               <h3 class="workout-name">{{ workout.name }}</h3>
-              <p class="workout-meta text-muted">{{ workout.exercises.length }} ejercicios</p>
+              <p class="workout-meta text-muted">
+                {{ workout.exercises.length }} ejercicios • {{ getTotalSets(workout) }} series
+              </p>
             </div>
             <div class="workout-actions">
               <span class="play-icon">►</span>
@@ -124,6 +126,10 @@ const startEmptyWorkout = () => {
 const startWorkout = (workoutId: string) => {
   const sessionId = startSession(workoutId)
   router.push(`/session/${sessionId}`)
+}
+
+const getTotalSets = (workout: any) => {
+  return workout.exercises.reduce((acc: number, ex: any) => acc + (ex.targetSets || 3), 0)
 }
 
 // Deletion Logic

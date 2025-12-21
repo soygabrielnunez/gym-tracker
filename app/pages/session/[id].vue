@@ -30,6 +30,25 @@
             <span class="exercise-badge">Activo</span>
           </div>
           
+          <!-- Target Info -->
+          <div v-if="exercise.targetSets || exercise.targetReps || exercise.targetWeight" class="target-info mb-4">
+            <span class="target-label">Objetivo:</span>
+            <span class="target-value">
+              {{ exercise.targetSets || '?' }} series × 
+              {{ exercise.targetReps || '?' }} reps
+              <template v-if="exercise.targetWeight > 0"> @ {{ exercise.targetWeight }}kg</template>
+            </span>
+          </div>
+          
+          <!-- Progress Indicator -->
+          <div class="progress-bar mb-4" v-if="exercise.targetSets">
+            <div 
+              class="progress-fill" 
+              :style="{ width: Math.min(100, (exercise.sets.length / exercise.targetSets) * 100) + '%' }"
+            ></div>
+            <span class="progress-text">{{ exercise.sets.length }}/{{ exercise.targetSets }} series</span>
+          </div>
+          
           <!-- Completed Sets -->
           <div v-if="exercise.sets.length > 0" class="sets-list mb-4">
             <div v-for="(set, setIndex) in exercise.sets" :key="setIndex" class="set-row">
@@ -98,12 +117,15 @@
             <div class="collapsed-info">
               <h3 class="collapsed-name">{{ exercise.name }}</h3>
               <span class="collapsed-sets text-muted">
-                {{ exercise.sets.length }} series
+                {{ exercise.sets.length }}<template v-if="exercise.targetSets">/{{ exercise.targetSets }}</template> series
               </span>
             </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="collapsed-chevron">
-              <path d="M9 18l6-6-6-6"/>
-            </svg>
+            <div class="collapsed-right">
+              <span v-if="exercise.targetSets && exercise.sets.length >= exercise.targetSets" class="completed-badge">✓</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="collapsed-chevron">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -167,12 +189,13 @@ onMounted(() => {
   updateTimer()
   timerInterval = setInterval(updateTimer, 1000)
 
-  // Initialize inputs with smart defaults
+  // Initialize inputs with smart defaults from targets
   if (activeSession.value) {
     if (typeof activeSession.value.currentExerciseIndex === 'undefined') {
        activeSession.value.currentExerciseIndex = 0
     }
     activeSession.value.exercises.forEach((e: any) => {
+      // Use target values as defaults
       if (e.currentWeight === undefined) e.currentWeight = e.targetWeight || 0
       if (e.currentReps === undefined) e.currentReps = e.targetReps || 10
     })
@@ -215,6 +238,9 @@ const confirmAddExercise = (name: string) => {
     activeSession.value.exercises.push({
       name,
       sets: [],
+      targetSets: 3,
+      targetReps: 10,
+      targetWeight: 0,
       currentWeight: 0,
       currentReps: 10
     })
@@ -289,12 +315,57 @@ const confirmFinish = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
 }
 
 .exercise-name {
   margin: 0;
   font-size: 1.25rem;
+}
+
+/* Target Info */
+.target-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-primary-dim);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+}
+
+.target-label {
+  color: var(--color-text-muted);
+}
+
+.target-value {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Progress Bar */
+.progress-bar {
+  position: relative;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0;
+  visibility: hidden;
 }
 
 /* Sets List */
@@ -379,8 +450,27 @@ const confirmFinish = () => {
   font-size: 0.85rem;
 }
 
+.collapsed-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
 .collapsed-chevron {
   color: var(--color-text-muted);
+}
+
+.completed-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: var(--color-primary);
+  color: black;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: bold;
 }
 
 /* Loading State */
