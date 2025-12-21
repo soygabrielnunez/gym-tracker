@@ -113,7 +113,7 @@ const calculateDuration = (start: string, end: string) => {
 .session-name {
   font-size: 1.5rem;
   color: var(--color-text);
-  text-transform: none;
+  text-transform: uppercase;
   margin-bottom: var(--spacing-xs);
 }
 
@@ -151,6 +151,7 @@ const calculateDuration = (start: string, end: string) => {
   margin: 0 0 var(--spacing-md) 0;
   font-size: 1.1rem;
   font-weight: 600;
+  text-transform: uppercase;
 }
 
 /* Sets */

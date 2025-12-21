@@ -216,6 +216,7 @@ const goToHistoryDetail = (sessionId: string) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: uppercase;
 }
 
 .workout-meta {
@@ -251,6 +252,7 @@ const goToHistoryDetail = (sessionId: string) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: uppercase;
 }
 
 .history-meta {

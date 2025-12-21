@@ -17,8 +17,8 @@
       <label class="label">Nombre de la Rutina</label>
       <input 
         v-model="name" 
-        class="input" 
-        placeholder="Ej: Pierna Hipertrofia" 
+        class="input input-uppercase" 
+        placeholder="Ej: PIERNA HIPERTROFIA" 
         autofocus
       />
     </div>
@@ -41,8 +41,8 @@
             <span class="exercise-index">{{ index + 1 }}</span>
             <input 
               v-model="exercise.name" 
-              class="exercise-name-input" 
-              placeholder="Nombre del ejercicio"
+              class="exercise-name-input input-uppercase" 
+              placeholder="NOMBRE DEL EJERCICIO"
             />
             <button 
               class="btn-icon danger" 

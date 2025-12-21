@@ -330,6 +330,7 @@ const confirmFinish = () => {
 .exercise-name {
   margin: 0;
   font-size: 1.25rem;
+  text-transform: uppercase;
 }
 
 /* Target Info */
@@ -474,6 +475,7 @@ const confirmFinish = () => {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
+  text-transform: uppercase;
 }
 
 .collapsed-sets {

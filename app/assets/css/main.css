@@ -337,6 +337,15 @@ p {
   background-color: var(--color-surface-elevated);
 }
 
+/* Uppercase input */
+.input-uppercase {
+  text-transform: uppercase;
+}
+
+.input-uppercase::placeholder {
+  text-transform: uppercase;
+}
+
 /* Large input for numbers (weight, reps) */
 .input-giant {
   font-size: 1.75rem;
