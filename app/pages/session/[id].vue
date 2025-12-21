@@ -23,8 +23,20 @@
           <div v-if="exercise.sets.length > 0" class="sets-history mb-4">
             <div v-for="(set, setIndex) in exercise.sets" :key="setIndex" class="set-row">
               <span class="set-num">#{{ setIndex + 1 }}</span>
-              <span class="set-data">{{ set.weight }}kg x {{ set.reps }}</span>
-              <span class="set-check">✓</span>
+              <span class="set-data">{{ set.weight > 0 ? `${set.weight}kg x` : '' }} {{ set.reps }} reps</span>
+              <div style="display:flex; align-items:center; gap:10px">
+                <span class="set-check">✓</span>
+                <button 
+                  class="btn-icon-small" 
+                  @click="removeSet(exercise, setIndex)"
+                  style="padding: 4px; border:none; background:none; cursor:pointer; color:#888"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6L6 18"></path>
+                    <path d="M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -159,16 +171,20 @@ const formatTime = (seconds: number) => {
 }
 
 const logSet = (exercise: any) => {
-  if (!exercise.currentWeight || !exercise.currentReps) return
+  if (!exercise.currentReps) return
 
   exercise.sets.push({
-    weight: exercise.currentWeight,
+    weight: exercise.currentWeight || 0,
     reps: exercise.currentReps,
     completedAt: new Date().toISOString()
   })
   
   // Keep values for next set (Smart Defaults)
   // Maybe slight auto-increment logic or keep same
+}
+
+const removeSet = (exercise: any, index: number) => {
+  exercise.sets.splice(index, 1)
 }
 
 const showExerciseModal = ref(false)
