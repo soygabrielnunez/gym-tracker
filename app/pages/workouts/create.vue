@@ -89,6 +89,18 @@
               />
             </div>
           </div>
+          
+          <!-- Notes (Optional) -->
+          <div class="exercise-notes">
+            <textarea 
+              v-model="exercise.notes" 
+              class="input notes-input"
+              placeholder="Notas opcionales (ej: agarre ancho, pausado...)"
+              rows="1"
+              @focus="expandNotes($event)"
+              @blur="collapseNotes($event)"
+            ></textarea>
+          </div>
         </div>
       </div>
       
@@ -121,8 +133,21 @@ const addExercise = () => {
     name: '',
     targetSets: 3,
     targetReps: 10,
-    targetWeight: 0
+    targetWeight: 0,
+    notes: ''
   })
+}
+
+const expandNotes = (event: FocusEvent) => {
+  const textarea = event.target as HTMLTextAreaElement
+  textarea.rows = 2
+}
+
+const collapseNotes = (event: FocusEvent) => {
+  const textarea = event.target as HTMLTextAreaElement
+  if (!textarea.value.trim()) {
+    textarea.rows = 1
+  }
 }
 
 const removeExercise = (index: number) => {
@@ -238,5 +263,23 @@ const saveWorkout = () => {
 .target-input[type=number] {
   -moz-appearance: textfield;
   appearance: textfield;
+}
+
+/* Notes */
+.exercise-notes {
+  margin-top: var(--spacing-md);
+}
+
+.notes-input {
+  resize: none;
+  font-size: 0.9rem;
+  padding: var(--spacing-sm) var(--spacing-md);
+  min-height: auto;
+  transition: all var(--transition-fast);
+}
+
+.notes-input::placeholder {
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 </style>

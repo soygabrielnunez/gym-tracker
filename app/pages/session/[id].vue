@@ -40,6 +40,15 @@
             </span>
           </div>
           
+          <!-- Notes -->
+          <div v-if="exercise.notes" class="exercise-notes mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="notes-icon">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+            </svg>
+            <span class="notes-text">{{ exercise.notes }}</span>
+          </div>
+          
           <!-- Progress Indicator -->
           <div class="progress-bar mb-4" v-if="exercise.targetSets">
             <div 
@@ -341,6 +350,27 @@ const confirmFinish = () => {
 .target-value {
   color: var(--color-primary);
   font-weight: 600;
+}
+
+/* Exercise Notes */
+.exercise-notes {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.notes-icon {
+  flex-shrink: 0;
+}
+
+.notes-text {
+  line-height: 1.4;
 }
 
 /* Progress Bar */
