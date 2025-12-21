@@ -25,13 +25,13 @@
           <!-- Sets Done -->
           <div v-if="exercise.sets.length > 0" class="sets-history mb-4">
             <div v-for="(set, setIndex) in exercise.sets" :key="setIndex" class="set-row">
-              <span class="set-num">#{{ setIndex + 1 }}</span>
+              <span class="set-num">#{{ Number(setIndex) + 1 }}</span>
               <span class="set-data">{{ set.weight > 0 ? `${set.weight}kg x` : '' }} {{ set.reps }} reps</span>
               <div style="display:flex; align-items:center; gap:10px">
                 <span class="set-check">✓</span>
                 <button 
                   class="btn-icon-small" 
-                  @click="removeSet(exercise, setIndex)"
+                  @click="removeSet(exercise, Number(setIndex))"
                   style="padding: 4px; border:none; background:none; cursor:pointer; color:#888"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

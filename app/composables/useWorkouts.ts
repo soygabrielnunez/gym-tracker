@@ -8,7 +8,7 @@ export const useWorkouts = () => {
     const activeSession = useState<any>('activeSession', () => null)
 
     // Load from localsotrage on client init
-    if (process.client) {
+    if (import.meta.client) {
         const savedWorkouts = localStorage.getItem('gym-workouts')
         if (savedWorkouts) workouts.value = JSON.parse(savedWorkouts)
 
@@ -18,11 +18,11 @@ export const useWorkouts = () => {
 
     // Save changes watcher
     watch(workouts, (newVal) => {
-        if (process.client) localStorage.setItem('gym-workouts', JSON.stringify(newVal))
+        if (import.meta.client) localStorage.setItem('gym-workouts', JSON.stringify(newVal))
     }, { deep: true })
 
     watch(history, (newVal) => {
-        if (process.client) localStorage.setItem('gym-history', JSON.stringify(newVal))
+        if (import.meta.client) localStorage.setItem('gym-history', JSON.stringify(newVal))
     }, { deep: true })
 
     const createWorkout = (name: string, exercises: any[]) => {

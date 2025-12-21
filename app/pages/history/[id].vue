@@ -16,7 +16,7 @@
         
         <div v-if="exercise.sets && exercise.sets.length > 0">
           <div v-for="(set, sIndex) in exercise.sets" :key="sIndex" class="set-row">
-            <span class="set-num">#{{ sIndex + 1 }}</span>
+            <span class="set-num">#{{ Number(sIndex) + 1 }}</span>
             <span class="set-data">
               {{ set.weight > 0 ? `${set.weight}kg x` : '' }} {{ set.reps }} reps
             </span>
