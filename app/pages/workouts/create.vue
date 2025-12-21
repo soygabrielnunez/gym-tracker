@@ -1,5 +1,8 @@
 <template>
   <div>
+    <NuxtLink to="/" class="btn btn-secondary mb-4" style="width:auto; display:inline-block">
+        ← Volver
+    </NuxtLink>
     <h1 class="mb-4">Nueva Rutina</h1>
     
     <div class="card mb-4">

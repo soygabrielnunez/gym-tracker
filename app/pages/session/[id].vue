@@ -1,5 +1,8 @@
 <template>
   <div v-if="activeSession">
+    <div class="mb-4">
+       <NuxtLink to="/" class="btn btn-secondary" style="width:auto; display:inline-block">← Volver</NuxtLink>
+    </div>
     <div class="header-actions mb-4">
       <h1 style="font-size:1.5rem; margin:0">{{ activeSession.name }}</h1>
       <button class="btn btn-sm" @click="finish" style="width:auto; padding:0.5rem 1rem; background:#ff4444; color:white">
