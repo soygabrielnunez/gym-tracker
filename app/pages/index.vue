@@ -50,7 +50,13 @@
         No hay entrenamientos completados.
       </div>
       <div v-else class="history-list">
-        <div v-for="session in history" :key="session.id" class="card mb-4 history-card">
+        <div 
+          v-for="session in history" 
+          :key="session.id" 
+          class="card mb-4 history-card" 
+          @click="goToHistoryDetail(session.id)"
+          style="cursor: pointer"
+        >
           <div style="display:flex; justify-content:space-between; align-items:flex-start">
             <div>
               <h3 class="h4" style="margin:0 0 0.5rem 0">{{ session.name }}</h3>
@@ -145,6 +151,10 @@ const formatDate = (isoString: string) => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+const goToHistoryDetail = (sessionId: string) => {
+  router.push(`/history/${sessionId}`)
 }
 </script>
 
