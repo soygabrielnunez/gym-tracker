@@ -44,7 +44,6 @@
               </p>
             </div>
             <div class="workout-actions">
-              <span class="play-icon">►</span>
               <button 
                 class="btn-icon danger" 
                 @click.stop="confirmDeleteWorkout(workout.id)"
@@ -228,11 +227,6 @@ const goToHistoryDetail = (sessionId: string) => {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-}
-
-.play-icon {
-  color: var(--color-primary);
-  font-size: 1.25rem;
 }
 
 /* History Cards */
