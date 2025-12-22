@@ -82,6 +82,74 @@ export const useWorkouts = () => {
         workouts.value = workouts.value.filter(w => w.id !== workoutId)
     }
 
+    const exportWorkout = (workoutId: string) => {
+        const workout = workouts.value.find(w => w.id === workoutId)
+        if (!workout) return
+
+        const exportData = {
+            version: 1,
+            type: 'gym-tracker-routine',
+            name: workout.name,
+            exercises: workout.exercises.map((e: any) => ({
+                name: e.name,
+                targetSets: e.targetSets,
+                targetReps: e.targetReps,
+                targetWeight: e.targetWeight,
+                notes: e.notes || ''
+            })),
+            exportedAt: new Date().toISOString()
+        }
+
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${workout.name.toLowerCase().replace(/\s+/g, '-')}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+    }
+
+    const importWorkout = (file: File): Promise<{ success: boolean; message: string }> => {
+        return new Promise((resolve) => {
+            const reader = new FileReader()
+
+            reader.onload = (e) => {
+                try {
+                    const content = e.target?.result as string
+                    const data = JSON.parse(content)
+
+                    if (data.type !== 'gym-tracker-routine' || !data.name || !data.exercises) {
+                        resolve({ success: false, message: 'Formato de archivo inválido' })
+                        return
+                    }
+
+                    const newWorkout = {
+                        id: crypto.randomUUID(),
+                        name: data.name,
+                        exercises: data.exercises.map((e: any) => ({
+                            name: e.name || '',
+                            targetSets: e.targetSets || 3,
+                            targetReps: e.targetReps || 10,
+                            targetWeight: e.targetWeight || 0,
+                            notes: e.notes || ''
+                        })),
+                        createdAt: new Date().toISOString()
+                    }
+
+                    workouts.value.push(newWorkout)
+                    resolve({ success: true, message: `Rutina "${data.name}" importada!` })
+                } catch (error) {
+                    resolve({ success: false, message: 'Error al procesar el archivo' })
+                }
+            }
+
+            reader.onerror = () => resolve({ success: false, message: 'Error al leer el archivo' })
+            reader.readAsText(file)
+        })
+    }
+
     return {
         workouts,
         history,
@@ -90,6 +158,8 @@ export const useWorkouts = () => {
         startSession,
         finishSession,
         deleteSession,
-        deleteWorkout
+        deleteWorkout,
+        exportWorkout,
+        importWorkout
     }
 }
