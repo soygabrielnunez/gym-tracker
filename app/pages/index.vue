@@ -39,8 +39,19 @@
         style="display: none" 
         @change="handleFileImport"
       />
+
+      <div v-if="showCombinedEmptyState" class="empty-state-container">
+        <div class="empty-state">
+          <p>No hay rutinas guardadas.</p>
+          <p class="text-muted" style="font-size: 0.875rem; margin: 0">Crea una rutina o importa un archivo</p>
+        </div>
+        <div class="empty-state">
+          <p>No hay entrenamientos completados.</p>
+          <p class="text-muted" style="font-size: 0.875rem; margin: 0">Tu progreso aparecerá aquí</p>
+        </div>
+      </div>
       
-      <div v-if="workouts.length === 0" class="empty-state">
+      <div v-if="workouts.length === 0 && !showCombinedEmptyState" class="empty-state">
         <p>No hay rutinas guardadas.</p>
         <p class="text-muted" style="font-size: 0.875rem; margin: 0">Crea una rutina o importa un archivo</p>
       </div>
@@ -93,7 +104,7 @@
         <span class="exercise-badge" v-if="history.length > 0">{{ history.length }}</span>
       </div>
       
-      <div v-if="history.length === 0" class="empty-state">
+      <div v-if="history.length === 0 && !showCombinedEmptyState" class="empty-state">
         <p>No hay entrenamientos completados.</p>
         <p class="text-muted" style="font-size: 0.875rem; margin: 0">Tu progreso aparecerá aquí</p>
       </div>
@@ -139,8 +150,30 @@
 </template>
 
 <script setup lang="ts">
-const { workouts, startSession, exportWorkout, importWorkout } = useWorkouts()
+import { computed } from 'vue'
 const router = useRouter()
+const route = useRoute()
+
+const {
+  workouts,
+  history,
+  startSession,
+  exportWorkout,
+  importWorkout,
+  deleteSession,
+  deleteWorkout
+} = useWorkouts()
+
+if (route.query.workouts) {
+  workouts.value = JSON.parse(route.query.workouts as string)
+}
+if (route.query.history) {
+  history.value = JSON.parse(route.query.history as string)
+}
+
+const showCombinedEmptyState = computed(() => {
+  return workouts.value.length === 0 && history.value.length === 0
+})
 
 const fileInput = ref<HTMLInputElement | null>(null)
 
@@ -178,7 +211,6 @@ const getTotalSets = (workout: any) => {
 }
 
 // Deletion Logic
-const { history, deleteSession, deleteWorkout } = useWorkouts()
 const showDeleteModal = ref(false)
 const sessionToDelete = ref<string | null>(null)
 const workoutToDelete = ref<string | null>(null)
