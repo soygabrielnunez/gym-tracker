@@ -166,6 +166,7 @@ export const useWorkouts = () => {
         history,
         activeSession,
         createWorkout,
+        updateWorkout,
         startSession,
         finishSession,
         deleteSession,
