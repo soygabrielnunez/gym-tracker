@@ -71,26 +71,45 @@
               </p>
             </div>
             <div class="workout-actions">
-              <button 
-                class="btn-icon" 
-                @click.stop="handleExport(workout.id)"
-                title="Exportar rutina"
+              <NuxtLink
+                :to="`/workouts/${workout.id}`"
+                class="btn-icon"
+                title="Editar rutina"
+                @click.stop
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                 </svg>
-              </button>
-              <button 
-                class="btn-icon danger" 
-                @click.stop="confirmDeleteWorkout(workout.id)"
-                title="Eliminar rutina"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 6h18"/>
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                </svg>
-              </button>
+              </NuxtLink>
+
+              <!-- More Options Menu -->
+              <div class="options-menu-container">
+                <button
+                  class="btn-icon"
+                  @click.stop="toggleOptionsMenu(workout.id)"
+                  title="Más opciones"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+                  </svg>
+                </button>
+
+                <div v-if="openMenuId === workout.id" class="options-menu card">
+                  <button
+                    class="btn-menu-item"
+                    @click.stop="handleExport(workout.id)"
+                  >
+                    Exportar
+                  </button>
+                  <button
+                    class="btn-menu-item danger"
+                    @click.stop="confirmDeleteWorkout(workout.id)"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -212,6 +231,7 @@ const getTotalSets = (workout: any) => {
 
 // Deletion Logic
 const showDeleteModal = ref(false)
+const openMenuId = ref<string | null>(null)
 const sessionToDelete = ref<string | null>(null)
 const workoutToDelete = ref<string | null>(null)
 const deleteType = ref<'history' | 'workout'>('history')
@@ -226,7 +246,31 @@ const confirmDelete = (sessionId: string) => {
   showDeleteModal.value = true
 }
 
+const toggleOptionsMenu = (workoutId: string) => {
+  if (openMenuId.value === workoutId) {
+    openMenuId.value = null
+  } else {
+    openMenuId.value = workoutId
+  }
+}
+
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  if (!target.closest('.options-menu-container')) {
+    openMenuId.value = null
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
 const confirmDeleteWorkout = (workoutId: string) => {
+  openMenuId.value = null // Close menu
   workoutToDelete.value = workoutId
   deleteType.value = 'workout'
   modalTitle.value = '¿Eliminar rutina?'
@@ -305,6 +349,50 @@ const goToHistoryDetail = (sessionId: string) => {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+}
+
+.options-menu-container {
+  position: relative;
+}
+
+.options-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  min-width: 120px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.btn-menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  background-color: transparent;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  text-align: left;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btn-menu-item:hover {
+  background-color: var(--color-background-muted);
+}
+
+.btn-menu-item.danger {
+  color: var(--color-danger);
+}
+
+.btn-menu-item.danger:hover {
+  background-color: var(--color-danger-muted);
 }
 
 .header-actions {
