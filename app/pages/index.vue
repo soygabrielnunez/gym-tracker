@@ -40,20 +40,11 @@
         @change="handleFileImport"
       />
 
-      <div v-if="showCombinedEmptyState" class="empty-state-container">
-        <div class="empty-state">
+      <div v-if="workouts.length === 0" class="empty-state-wrapper">
+        <div class="empty-state-content">
           <p>No hay rutinas guardadas.</p>
           <p class="text-muted" style="font-size: 0.875rem; margin: 0">Crea una rutina o importa un archivo</p>
         </div>
-        <div class="empty-state">
-          <p>No hay entrenamientos completados.</p>
-          <p class="text-muted" style="font-size: 0.875rem; margin: 0">Tu progreso aparecerá aquí</p>
-        </div>
-      </div>
-      
-      <div v-if="workouts.length === 0 && !showCombinedEmptyState" class="empty-state">
-        <p>No hay rutinas guardadas.</p>
-        <p class="text-muted" style="font-size: 0.875rem; margin: 0">Crea una rutina o importa un archivo</p>
       </div>
       
       <div v-else class="row-stack">
@@ -123,9 +114,11 @@
         <span class="exercise-badge" v-if="history.length > 0">{{ history.length }}</span>
       </div>
       
-      <div v-if="history.length === 0 && !showCombinedEmptyState" class="empty-state">
-        <p>No hay entrenamientos completados.</p>
-        <p class="text-muted" style="font-size: 0.875rem; margin: 0">Tu progreso aparecerá aquí</p>
+      <div v-if="history.length === 0" class="empty-state-wrapper">
+        <div class="empty-state-content">
+          <p>No hay entrenamientos completados.</p>
+          <p class="text-muted" style="font-size: 0.875rem; margin: 0">Tu progreso aparecerá aquí</p>
+        </div>
       </div>
       
       <div v-else class="row-stack">
@@ -189,10 +182,6 @@ if (route.query.workouts) {
 if (route.query.history) {
   history.value = JSON.parse(route.query.history as string)
 }
-
-const showCombinedEmptyState = computed(() => {
-  return workouts.value.length === 0 && history.value.length === 0
-})
 
 const fileInput = ref<HTMLInputElement | null>(null)
 
