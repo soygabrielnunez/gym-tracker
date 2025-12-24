@@ -478,7 +478,7 @@ textarea {
 }
 
 /* Empty state */
-.empty-state-wrapper {
+.empty-state-container {
   padding: var(--spacing-2xl) var(--spacing-lg);
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-lg);

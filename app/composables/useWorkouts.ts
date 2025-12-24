@@ -36,17 +36,6 @@ export const useWorkouts = () => {
         return newWorkout.id
     }
 
-    const updateWorkout = (workoutId: string, updatedData: any) => {
-        const workoutIndex = workouts.value.findIndex(w => w.id === workoutId)
-        if (workoutIndex !== -1) {
-            workouts.value[workoutIndex] = {
-                ...workouts.value[workoutIndex],
-                ...updatedData,
-                updatedAt: new Date().toISOString()
-            }
-        }
-    }
-
     const startSession = (workoutId?: string) => {
         let sessionBase = {
             id: crypto.randomUUID(),
@@ -166,7 +155,6 @@ export const useWorkouts = () => {
         history,
         activeSession,
         createWorkout,
-        updateWorkout,
         startSession,
         finishSession,
         deleteSession,

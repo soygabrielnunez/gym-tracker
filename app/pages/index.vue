@@ -40,7 +40,7 @@
         @change="handleFileImport"
       />
 
-      <div v-if="workouts.length === 0" class="empty-state-wrapper">
+      <div v-if="workouts.length === 0" class="empty-state-container">
         <div class="empty-state-content">
           <p>No hay rutinas guardadas.</p>
           <p class="text-muted" style="font-size: 0.875rem; margin: 0">Crea una rutina o importa un archivo</p>
@@ -62,18 +62,6 @@
               </p>
             </div>
             <div class="workout-actions">
-              <NuxtLink
-                :to="`/workouts/${workout.id}`"
-                class="btn-icon"
-                title="Editar rutina"
-                @click.stop
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-              </NuxtLink>
-
               <!-- More Options Menu -->
               <div class="options-menu-container">
                 <button
@@ -114,7 +102,7 @@
         <span class="exercise-badge" v-if="history.length > 0">{{ history.length }}</span>
       </div>
       
-      <div v-if="history.length === 0" class="empty-state-wrapper">
+      <div v-if="history.length === 0" class="empty-state-container">
         <div class="empty-state-content">
           <p>No hay entrenamientos completados.</p>
           <p class="text-muted" style="font-size: 0.875rem; margin: 0">Tu progreso aparecerá aquí</p>
@@ -175,13 +163,6 @@ const {
   deleteSession,
   deleteWorkout
 } = useWorkouts()
-
-if (route.query.workouts) {
-  workouts.value = JSON.parse(route.query.workouts as string)
-}
-if (route.query.history) {
-  history.value = JSON.parse(route.query.history as string)
-}
 
 const fileInput = ref<HTMLInputElement | null>(null)
 
