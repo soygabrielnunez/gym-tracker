@@ -34,3 +34,17 @@ Para agregar una nueva funcionalidad:
 2.  **Crea o Modifica Componentes**: Desarrolla los componentes de la interfaz de usuario en `app/components/` o `app/pages/`.
 3.  **Conecta la Lógica**: Llama a las funciones del composable desde tus componentes para manejar eventos y mostrar datos.
 4.  **Verificación Manual**: Inicia el servidor de desarrollo (`npm run dev`) y prueba exhaustivamente los cambios en el navegador. Asegúrate de que no haya errores en la consola, especialmente relacionados con la hidratación (mismatch entre servidor y cliente).
+
+## Funcionalidades Clave Implementadas
+
+### Persistencia de la Sesión Activa
+
+- **Objetivo**: Permitir al usuario reanudar un entrenamiento activo si recarga la página o cierra la aplicación.
+- **Implementación**:
+  1.  **`useWorkouts.ts`**:
+      - El estado `activeSession` se sincroniza con `localStorage` bajo la clave `gym-active-session`.
+      - Un `watch` se encarga de guardar cualquier cambio en `activeSession` en `localStorage`.
+      - Cuando la sesión termina (`finishSession`), `activeSession` se establece en `null`, y el `watch` elimina la entrada de `localStorage`.
+  2.  **`app.vue`**:
+      - En el hook `onMounted`, la aplicación comprueba si existe una `activeSession` en el estado (cargada desde `localStorage` por `useWorkouts.ts`).
+      - Si se encuentra una sesión y el usuario no está ya en la página de esa sesión, se le redirige automáticamente a `/session/[id]`.

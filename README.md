@@ -7,6 +7,7 @@ Un simple pero potente tracker de gimnasio para crear, seguir y gestionar tus ru
 - **Creación de Rutinas**: Diseña rutinas de entrenamiento personalizadas con múltiples ejercicios.
 - **Sesiones de Entrenamiento**: Inicia sesiones de entrenamiento basadas en tus rutinas o comienza un entrenamiento libre.
 - **Historial de Sesiones**: Revisa tus entrenamientos completados para seguir tu progreso.
+- **Persistencia de Sesión**: Si sales de la aplicación o recargas la página durante un entrenamiento, la sesión activa se guarda para que puedas retomarla donde la dejaste.
 - **Gestión de Datos**:
   - **Exportar**: Guarda tus rutinas como archivos `.json` para tener copias de seguridad o compartirlas.
   - **Importar**: Carga rutinas desde archivos `.json` para una configuración rápida.
