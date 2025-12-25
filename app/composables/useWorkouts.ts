@@ -1,3 +1,5 @@
+import { onMounted } from 'vue'
+
 export const useWorkouts = () => {
     // State (persisted in localStorage would be ideal, but using useState for Nuxt reactivity)
     // In a real app, use useStorage or pinia-plugin-persistedstate
@@ -8,13 +10,13 @@ export const useWorkouts = () => {
     const activeSession = useState<any>('activeSession', () => null)
 
     // Load from localsotrage on client init
-    if (import.meta.client) {
+    onMounted(() => {
         const savedWorkouts = localStorage.getItem('gym-workouts')
         if (savedWorkouts) workouts.value = JSON.parse(savedWorkouts)
 
         const savedHistory = localStorage.getItem('gym-history')
         if (savedHistory) history.value = JSON.parse(savedHistory)
-    }
+    })
 
     // Save changes watcher
     watch(workouts, (newVal) => {
