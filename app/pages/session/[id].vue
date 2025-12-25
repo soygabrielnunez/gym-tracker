@@ -60,14 +60,15 @@
           
           <!-- Completed Sets -->
           <div v-if="exercise.sets.length > 0" class="sets-list mb-4">
-            <div v-for="(set, setIndex) in exercise.sets" :key="setIndex" class="set-row">
-              <div class="set-info">
-                <span class="set-number">#{{ Number(setIndex) + 1 }}</span>
-                <span class="set-data">
-                  {{ set.weight > 0 ? `${set.weight}kg × ` : '' }}{{ set.reps }} reps
-                </span>
-              </div>
-              <div class="set-actions">
+            <div v-for="(set, setIndex) in exercise.sets" :key="setIndex" class="set-item">
+              <div class="set-row">
+                <div class="set-info">
+                  <span class="set-number">#{{ Number(setIndex) + 1 }}</span>
+                  <span class="set-data">
+                    {{ set.weight > 0 ? `${set.weight}kg × ` : '' }}{{ set.reps }} reps
+                  </span>
+                </div>
+                <div class="set-actions">
                 <span class="set-check">✓</span>
                 <button 
                   class="btn-icon danger" 
@@ -78,6 +79,13 @@
                   </svg>
                 </button>
               </div>
+            </div>
+            <div v-if="set.comment" class="set-comment">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="comment-icon">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+              </svg>
+              <span>{{ set.comment }}</span>
             </div>
           </div>
 
@@ -106,6 +114,15 @@
                   @focus="($event.target as HTMLInputElement).select()"
                 />
               </div>
+            </div>
+            <div class="input-group mb-4">
+              <label class="label-sm">Comentario</label>
+              <textarea
+                v-model="exercise.currentComment"
+                class="input"
+                placeholder="Añade una nota sobre esta serie..."
+                rows="2"
+              ></textarea>
             </div>
             <button class="btn btn-primary btn-add-set" @click="logSet(exercise)">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -207,6 +224,7 @@ onMounted(() => {
       // Use target values as defaults
       if (e.currentWeight === undefined) e.currentWeight = e.targetWeight || 0
       if (e.currentReps === undefined) e.currentReps = e.targetReps || 10
+      if (e.currentComment === undefined) e.currentComment = ''
     })
   }
 })
@@ -228,8 +246,12 @@ const logSet = (exercise: any) => {
   exercise.sets.push({
     weight: exercise.currentWeight || 0,
     reps: exercise.currentReps,
+    comment: exercise.currentComment || '',
     completedAt: new Date().toISOString()
   })
+
+  // Clear comment for next set
+  exercise.currentComment = ''
 }
 
 const removeSet = (exercise: any, index: number) => {
@@ -251,7 +273,8 @@ const confirmAddExercise = (name: string) => {
       targetReps: 10,
       targetWeight: 0,
       currentWeight: 0,
-      currentReps: 10
+      currentReps: 10,
+      currentComment: ''
     })
     activeSession.value.currentExerciseIndex = activeSession.value.exercises.length - 1
   }
@@ -406,16 +429,34 @@ const confirmFinish = () => {
   overflow: hidden;
 }
 
+.set-item {
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing-md);
+}
+.set-item:last-child {
+  border-bottom: none;
+}
+
 .set-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
 }
 
-.set-row:last-child {
-  border-bottom: none;
+.set-comment {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-sm);
+  padding-left: 48px; /* Align with set-data */
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  font-style: italic;
+}
+
+.comment-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .set-info {
