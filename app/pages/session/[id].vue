@@ -87,6 +87,7 @@
               </svg>
               <span>{{ set.comment }}</span>
             </div>
+            </div>
           </div>
 
           <!-- Add Set Form -->
