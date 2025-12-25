@@ -81,6 +81,17 @@
             </div>
           </div>
 
+          <!-- Session Notes -->
+          <div class="session-notes-form mt-4">
+            <label class="label-sm">Notas de la Sesión</label>
+            <textarea
+              v-model="exercise.sessionNotes"
+              class="input"
+              placeholder="Añade una nota sobre este ejercicio..."
+              rows="3"
+            ></textarea>
+          </div>
+
           <!-- Add Set Form -->
           <div class="add-set-form">
             <div class="input-grid mb-4">
@@ -207,6 +218,7 @@ onMounted(() => {
       // Use target values as defaults
       if (e.currentWeight === undefined) e.currentWeight = e.targetWeight || 0
       if (e.currentReps === undefined) e.currentReps = e.targetReps || 10
+      if (e.sessionNotes === undefined) e.sessionNotes = ''
     })
   }
 })
@@ -251,7 +263,8 @@ const confirmAddExercise = (name: string) => {
       targetReps: 10,
       targetWeight: 0,
       currentWeight: 0,
-      currentReps: 10
+      currentReps: 10,
+      sessionNotes: ''
     })
     activeSession.value.currentExerciseIndex = activeSession.value.exercises.length - 1
   }
