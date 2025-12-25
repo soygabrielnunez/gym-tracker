@@ -96,22 +96,22 @@
           <div class="add-set-form">
             <div class="input-grid mb-4">
               <div class="input-group">
-                <label class="label-sm">Kg</label>
+                <label class="label-sm">Reps</label>
                 <input 
                   type="number" 
-                  inputmode="decimal" 
-                  v-model="exercise.currentWeight" 
+                  inputmode="numeric" 
+                  v-model="exercise.currentReps" 
                   class="input input-giant"
                   placeholder="0"
                   @focus="($event.target as HTMLInputElement).select()"
                 />
               </div>
               <div class="input-group">
-                <label class="label-sm">Reps</label>
+                <label class="label-sm">Kg</label>
                 <input 
                   type="number" 
-                  inputmode="numeric" 
-                  v-model="exercise.currentReps" 
+                  inputmode="decimal" 
+                  v-model="exercise.currentWeight" 
                   class="input input-giant"
                   placeholder="0"
                   @focus="($event.target as HTMLInputElement).select()"
