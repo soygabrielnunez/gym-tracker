@@ -16,6 +16,9 @@ export const useWorkouts = () => {
 
         const savedHistory = localStorage.getItem('gym-history')
         if (savedHistory) history.value = JSON.parse(savedHistory)
+
+        const savedSession = localStorage.getItem('gym-active-session')
+        if (savedSession) activeSession.value = JSON.parse(savedSession)
     })
 
     // Save changes watcher
@@ -25,6 +28,16 @@ export const useWorkouts = () => {
 
     watch(history, (newVal) => {
         if (import.meta.client) localStorage.setItem('gym-history', JSON.stringify(newVal))
+    }, { deep: true })
+
+    watch(activeSession, (newVal) => {
+        if (import.meta.client) {
+            if (newVal) {
+                localStorage.setItem('gym-active-session', JSON.stringify(newVal))
+            } else {
+                localStorage.removeItem('gym-active-session')
+            }
+        }
     }, { deep: true })
 
     const createWorkout = (name: string, exercises: any[]) => {
