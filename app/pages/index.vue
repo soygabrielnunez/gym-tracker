@@ -22,23 +22,9 @@
       <div class="section-header">
         <h2 class="h3">Mis Rutinas</h2>
         <div class="header-actions">
-          <button class="btn-icon secondary" @click="triggerImport" title="Importar Rutina">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-          </button>
           <span class="exercise-badge" v-if="workouts.length > 0">{{ workouts.length }}</span>
         </div>
       </div>
-
-      <!-- Hidden File Input -->
-      <input 
-        type="file" 
-        ref="fileInput" 
-        accept=".json" 
-        style="display: none" 
-        @change="handleFileImport"
-      />
       
       <div v-if="workouts.length === 0" class="empty-state">
         <p>No hay rutinas guardadas.</p>
@@ -87,9 +73,9 @@
                 <div v-if="openMenuId === workout.id" class="options-menu card">
                   <button
                     class="btn-menu-item"
-                    @click.stop="handleExport(workout.id)"
+                    @click.stop="shareWorkout(workout.id)"
                   >
-                    Exportar
+                    Compartir
                   </button>
                   <button
                     class="btn-menu-item danger"
@@ -158,29 +144,8 @@
 </template>
 
 <script setup lang="ts">
-const { workouts, startSession, exportWorkout, importWorkout } = useWorkouts()
+const { workouts, startSession, shareWorkout } = useWorkouts()
 const router = useRouter()
-
-const fileInput = ref<HTMLInputElement | null>(null)
-
-const handleExport = (id: string) => {
-  exportWorkout(id)
-}
-
-const triggerImport = () => {
-  fileInput.value?.click()
-}
-
-const handleFileImport = async (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (file) {
-    const result = await importWorkout(file)
-    alert(result.message) // Simple feedback for now
-    target.value = '' // Reset input
-  }
-}
-
 
 const startEmptyWorkout = () => {
   const sessionId = startSession()
