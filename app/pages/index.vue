@@ -2,7 +2,7 @@
   <div>
     <!-- Hero Section -->
     <section class="hero-section mb-8">
-      <h1 class="mb-4">Tu Gym <span class="text-white">Tracker</span></h1>
+      <h1 class="mb-4">Tu Training <span class="text-white">Tracker</span></h1>
       
       <div class="card">
         <button class="btn btn-primary btn-hero mb-4" @click="startEmptyWorkout">
