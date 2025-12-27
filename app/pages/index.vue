@@ -140,6 +140,14 @@
     @confirm="handleDelete"
     @cancel="closeDeleteModal"
   />
+
+  <ConfirmModal
+    :show="showOverwriteModal"
+    title="¿Iniciar un nuevo entreno?"
+    message="Tienes un entrenamiento activo. Si continúas, se perderá el progreso actual. ¿Estás seguro?"
+    @confirm="handleOverwriteConfirm"
+    @cancel="showOverwriteModal = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -152,14 +160,38 @@ const resumeWorkout = () => {
   }
 }
 
+// Overwrite confirmation logic
+const showOverwriteModal = ref(false)
+const nextWorkoutId = ref<string | null>(null)
+const isStartingEmpty = ref(false)
+
 const startEmptyWorkout = () => {
-  const sessionId = startSession()
-  router.push(`/session/${sessionId}`)
+  if (activeSession.value) {
+    isStartingEmpty.value = true
+    nextWorkoutId.value = null
+    showOverwriteModal.value = true
+  } else {
+    const sessionId = startSession()
+    router.push(`/session/${sessionId}`)
+  }
 }
 
 const startWorkout = (workoutId: string) => {
+  if (activeSession.value) {
+    isStartingEmpty.value = false
+    nextWorkoutId.value = workoutId
+    showOverwriteModal.value = true
+  } else {
+    const sessionId = startSession(workoutId)
+    router.push(`/session/${sessionId}`)
+  }
+}
+
+const handleOverwriteConfirm = () => {
+  const workoutId = isStartingEmpty.value ? undefined : nextWorkoutId.value ?? undefined
   const sessionId = startSession(workoutId)
   router.push(`/session/${sessionId}`)
+  showOverwriteModal.value = false
 }
 
 const editWorkout = (workoutId: string) => {
