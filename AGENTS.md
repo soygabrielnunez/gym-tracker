@@ -1,6 +1,6 @@
 # AGENTS.md - Guía para Agentes
 
-Esta guía proporciona directrices y contexto para trabajar en el proyecto Gym Tracker.
+Esta guía proporciona directrices y contexto para trabajar en el proyecto Training Tracker.
 
 ## Arquitectura del Proyecto
 

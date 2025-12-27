@@ -1,4 +1,4 @@
-# Gym Tracker
+# Training Tracker
 
 Un simple pero potente tracker de gimnasio para crear, seguir y gestionar tus rutinas de entrenamiento. Construido con Nuxt.js, este proyecto es una aplicación de página única (SPA) que funciona completamente en el lado del cliente y persiste los datos en el `localStorage` de tu navegador.
 
