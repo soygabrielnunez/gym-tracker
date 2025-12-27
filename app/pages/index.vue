@@ -5,6 +5,11 @@
       <h1 class="mb-4">Tu Gym <span class="text-white">Tracker</span></h1>
       
       <div class="card">
+        <button v-if="activeSession" class="btn btn-primary btn-hero mb-4" @click="resumeWorkout">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+          Resumir Entreno
+        </button>
+
         <button class="btn btn-primary btn-hero mb-4" @click="startEmptyWorkout">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 5v14M5 12h14"/>
@@ -135,20 +140,58 @@
     @confirm="handleDelete"
     @cancel="closeDeleteModal"
   />
+
+  <ConfirmModal
+    :show="showOverwriteModal"
+    title="¿Iniciar un nuevo entreno?"
+    message="Tienes un entrenamiento activo. Si continúas, se perderá el progreso actual. ¿Estás seguro?"
+    @confirm="handleOverwriteConfirm"
+    @cancel="showOverwriteModal = false"
+  />
 </template>
 
 <script setup lang="ts">
-const { workouts, startSession, shareWorkout } = useWorkouts()
+const { workouts, activeSession, startSession, shareWorkout } = useWorkouts()
 const router = useRouter()
 
+const resumeWorkout = () => {
+  if (activeSession.value) {
+    router.push(`/session/${activeSession.value.id}`)
+  }
+}
+
+// Overwrite confirmation logic
+const showOverwriteModal = ref(false)
+const nextWorkoutId = ref<string | null>(null)
+const isStartingEmpty = ref(false)
+
 const startEmptyWorkout = () => {
-  const sessionId = startSession()
-  router.push(`/session/${sessionId}`)
+  if (activeSession.value) {
+    isStartingEmpty.value = true
+    nextWorkoutId.value = null
+    showOverwriteModal.value = true
+  } else {
+    const sessionId = startSession()
+    router.push(`/session/${sessionId}`)
+  }
 }
 
 const startWorkout = (workoutId: string) => {
+  if (activeSession.value) {
+    isStartingEmpty.value = false
+    nextWorkoutId.value = workoutId
+    showOverwriteModal.value = true
+  } else {
+    const sessionId = startSession(workoutId)
+    router.push(`/session/${sessionId}`)
+  }
+}
+
+const handleOverwriteConfirm = () => {
+  const workoutId = isStartingEmpty.value ? undefined : nextWorkoutId.value ?? undefined
   const sessionId = startSession(workoutId)
   router.push(`/session/${sessionId}`)
+  showOverwriteModal.value = false
 }
 
 const editWorkout = (workoutId: string) => {
