@@ -5,16 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useWorkouts } from '~/composables/useWorkouts'
-
-const { activeSession } = useWorkouts()
-const router = useRouter()
-const route = useRoute()
-
-onMounted(() => {
-  if (activeSession.value && route.path !== `/session/${activeSession.value.id}`) {
-    router.push(`/session/${activeSession.value.id}`)
-  }
-})
+// No global script logic is needed here.
+// The useWorkouts composable is loaded on individual pages where needed.
+// Removing the onMounted hook that caused the aggressive redirect.
 </script>
