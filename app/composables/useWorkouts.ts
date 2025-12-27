@@ -90,12 +90,17 @@ export const useWorkouts = () => {
     const finishSession = () => {
         if (!activeSession.value) return
 
-        const completedSession = {
-            ...activeSession.value,
-            endTime: new Date().toISOString()
+        // Check if any sets were recorded
+        const hasRecordedSets = activeSession.value.exercises.some((e: any) => e.sets && e.sets.length > 0)
+
+        if (hasRecordedSets) {
+            const completedSession = {
+                ...activeSession.value,
+                endTime: new Date().toISOString()
+            }
+            history.value.unshift(completedSession) // Add to top of history
         }
 
-        history.value.unshift(completedSession) // Add to top of history
         activeSession.value = null
     }
 
