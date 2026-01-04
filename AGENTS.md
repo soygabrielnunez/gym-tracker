@@ -25,6 +25,10 @@ Este es un proyecto **Nuxt.js 4** que funciona como una **Single Page Applicatio
     - **Importante**: Debido a que Nuxt.js renderiza en el servidor (SSR) durante el desarrollo y la compilación, el acceso a APIs del navegador como `localStorage` o `document` debe realizarse **únicamente dentro de hooks de ciclo de vida del lado del cliente**, como `onMounted`, o dentro de bloques condicionales `if (import.meta.client)`. No hacerlo provocará errores de hidratación.
 5.  **No hay Pruebas Configuradas**:
     - El proyecto no cuenta con un script de pruebas (`npm test`) configurado. Al realizar cambios, es crucial verificar manualmente la funcionalidad en el navegador.
+6.  **Consistencia de UI/UX**:
+    - Cualquier cambio visual o de experiencia de usuario que se realice debe ser **consistente** con el resto de la aplicación.
+    - Respeta la paleta de colores, tipografía, espaciado y estilos de botones existentes (diseño "dark mode" con acentos neón).
+    - Reutiliza componentes y clases CSS globales (`main.css`) siempre que sea posible para mantener la uniformidad.
 
 ## Flujo de Trabajo Típico
 

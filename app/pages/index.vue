@@ -2,7 +2,7 @@
   <div>
     <!-- Hero Section -->
     <section ref="heroSection" class="hero-section mb-8">
-      <h1 class="mb-4">Tu Gym <span class="text-white">Tracker</span></h1>
+      <h1 class="mb-8 pl-2">Tu Gym <span class="text-white">Tracker</span></h1>
       
       <div class="card">
         <button v-if="activeSession" class="btn btn-primary btn-hero mb-4" @click="resumeWorkout">
@@ -70,8 +70,13 @@
     <!-- History Section -->
     <section>
       <div class="section-header">
-        <h2 class="h3">Historial Reciente</h2>
-        <span class="exercise-badge" v-if="history.length > 0">{{ history.length }}</span>
+        <NuxtLink to="/history" class="row-between text-decoration-none" style="text-decoration: none; color: inherit; width: 100%;">
+            <div class="row" style="gap: 0.5rem;">
+                <h2 class="h3">Historial Reciente</h2>
+                <span class="exercise-badge" v-if="history.length > 0">{{ history.length }}</span>
+            </div>
+            <div class="text-primary text-sm font-bold uppercase">Ver todo</div>
+        </NuxtLink>
       </div>
       
       <div v-if="history.length === 0" class="empty-state">
