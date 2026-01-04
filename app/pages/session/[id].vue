@@ -14,7 +14,7 @@
 
       </div>
       <div class="header-right">
-        <!-- Finish button removed from header as requested -->
+        <button class="btn-finish" @click="finish">TERMINAR</button>
       </div>
     </header>
 
@@ -195,14 +195,14 @@
     </div>
 
     <!-- Modals -->
-    <ConfirmModal 
+    <ConfirmModal
       :show="showFinishModal"
-      title="¿Terminar entrenamiento?"
-      message="¿Seguro que quieres terminar?"
-      confirmText="TERMINAR"
+      title="¿Descartar entrenamiento?"
+      message="Se perderá todo el progreso de esta sesión. Esta acción no se puede deshacer."
+      confirmText="DESCARTAR"
       cancelText="CANCELAR"
       confirmType="danger"
-      @confirm="confirmFinish"
+      @confirm="confirmCancel"
       @cancel="showFinishModal = false"
     />
     
@@ -220,7 +220,7 @@
 <script setup lang="ts">
 const route = useRoute()
 const router = useRouter()
-const { activeSession, finishSession } = useWorkouts()
+const { activeSession, finishSession, cancelSession } = useWorkouts()
 const showFinishModal = ref(false)
 const showExerciseModal = ref(false)
 const isFinishScreen = ref(false)
@@ -338,6 +338,11 @@ const finish = () => {
 
 const confirmFinish = () => {
   finishSession()
+  router.push('/')
+}
+
+const confirmCancel = () => {
+  cancelSession()
   router.push('/')
 }
 
