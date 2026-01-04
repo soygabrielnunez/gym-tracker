@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="hero-section mb-8">
+    <section ref="heroSection" class="hero-section mb-8">
       <h1 class="mb-4">Tu Gym <span class="text-white">Tracker</span></h1>
       
       <div class="card">
@@ -51,39 +51,16 @@
               </p>
             </div>
             <div class="workout-actions">
-              <!-- More Options Menu -->
-              <div class="options-menu-container">
-                <button
-                  class="btn-icon"
-                  @click.stop="toggleOptionsMenu(workout.id)"
-                  title="Más opciones"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
-                  </svg>
-                </button>
-
-                <div v-if="openMenuId === workout.id" class="options-menu card">
-                  <button
-                    class="btn-menu-item"
-                    @click.stop="shareWorkout(workout.id)"
-                  >
-                    Compartir
-                  </button>
-                  <button
-                    class="btn-menu-item"
-                    @click.stop="editWorkout(workout.id)"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    class="btn-menu-item danger"
-                    @click.stop="confirmDeleteWorkout(workout.id)"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
+              <!-- More Options Menu Button -->
+              <button
+                class="btn-icon"
+                @click.stop="openWorkoutOptions(workout)"
+                title="Más opciones"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -148,6 +125,73 @@
     @confirm="handleOverwriteConfirm"
     @cancel="showOverwriteModal = false"
   />
+
+  <!-- Mobile Floating Action Button -->
+  <Fab :show="showFab" @click="handleFabClick">
+    <svg v-if="activeSession" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+    <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+  </Fab>
+
+  <!-- Start Workout Bottom Sheet -->
+  <BottomSheet
+    :show="showStartWorkoutSheet"
+    @update:show="showStartWorkoutSheet = $event"
+  >
+    <div class="sheet-content">
+      <h3 class="mb-4 text-center">Iniciar Entrenamiento</h3>
+      
+      <button class="btn btn-primary w-full mb-6" @click="startSheetEmptyWorkout">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Entrenar Libre
+      </button>
+
+      <div v-if="workouts.length > 0">
+        <div class="divider mb-4">
+            <span class="divider-text">O mis rutinas</span>
+        </div>
+        
+        <div class="row-stack">
+            <div 
+              v-for="workout in workouts" 
+              :key="workout.id" 
+              class="card card-interactive p-3"
+              @click="startSheetWorkout(workout.id)"
+            >
+                <div class="row-between">
+                    <span class="font-bold">{{ workout.name }}</span>
+                    <span class="text-muted text-sm">{{ workout.exercises.length }} ejercicios</span>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </BottomSheet>
+
+  <!-- Options Bottom Sheet -->
+  <BottomSheet 
+    :show="!!selectedWorkout" 
+    @update:show="val => !val && (selectedWorkout = null)"
+  >
+    <div v-if="selectedWorkout">
+        <h3 class="mb-4 text-center">{{ selectedWorkout.name }}</h3>
+        <div class="row-stack">
+            <button class="btn btn-secondary w-full" @click="handleShare(selectedWorkout.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Compartir
+            </button>
+            <button class="btn btn-secondary w-full" @click="handleEdit(selectedWorkout.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Editar
+            </button>
+            <button class="btn btn-danger w-full" @click="handleDeleteWorkoutRequest(selectedWorkout.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                Eliminar
+            </button>
+        </div>
+    </div>
+  </BottomSheet>
 </template>
 
 <script setup lang="ts">
@@ -155,11 +199,6 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/es'
 import isToday from 'dayjs/plugin/isToday'
 import isYesterday from 'dayjs/plugin/isYesterday'
-
-dayjs.locale('es')
-dayjs.extend(isToday)
-dayjs.extend(isYesterday)
-
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.locale('es')
@@ -167,8 +206,50 @@ dayjs.extend(isToday)
 dayjs.extend(isYesterday)
 dayjs.extend(relativeTime)
 
-const { workouts, activeSession, startSession, shareWorkout } = useWorkouts()
+const { workouts, activeSession, startSession, shareWorkout, history, deleteSession, deleteWorkout } = useWorkouts()
 const router = useRouter()
+
+// --- FAB Logic ---
+const showFab = ref(false)
+const showStartWorkoutSheet = ref(false)
+const heroSection = ref<HTMLElement | null>(null)
+
+const handleScroll = () => {
+    if (!heroSection.value) return
+    const rect = heroSection.value.getBoundingClientRect()
+    // Show FAB when hero bottom passes the top of the screen (or is close)
+    showFab.value = rect.bottom < 100 
+}
+
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll)
+    // Check initial state
+    handleScroll()
+})
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll)
+})
+
+const handleFabClick = () => {
+    if (activeSession.value) {
+        resumeWorkout()
+    } else {
+        showStartWorkoutSheet.value = true
+    }
+}
+
+const startSheetEmptyWorkout = () => {
+    showStartWorkoutSheet.value = false
+    startEmptyWorkout()
+}
+
+const startSheetWorkout = (workoutId: string) => {
+    showStartWorkoutSheet.value = false
+    startWorkout(workoutId)
+}
+
+// --- Navigation & Actions ---
 
 const resumeWorkout = () => {
   if (activeSession.value) {
@@ -218,53 +299,46 @@ const getTotalSets = (workout: any) => {
   return workout.exercises.reduce((acc: number, ex: any) => acc + (ex.targetSets || 3), 0)
 }
 
-// Deletion Logic
-const { history, deleteSession, deleteWorkout } = useWorkouts()
+// --- Deletion Logic ---
 const showDeleteModal = ref(false)
-const openMenuId = ref<string | null>(null)
 const sessionToDelete = ref<string | null>(null)
-const workoutToDelete = ref<string | null>(null)
+const workoutToDelete = ref<string | null>(null) // Used for logic
 const deleteType = ref<'history' | 'workout'>('history')
 const modalTitle = ref('')
 const modalMessage = ref('')
+
+// --- Bottom Sheet Logic ---
+const selectedWorkout = ref<any>(null)
+
+const openWorkoutOptions = (workout: any) => {
+    selectedWorkout.value = workout
+}
+
+const handleShare = (id: string) => {
+    shareWorkout(id)
+    selectedWorkout.value = null
+}
+
+const handleEdit = (id: string) => {
+    editWorkout(id)
+    selectedWorkout.value = null
+}
+
+const handleDeleteWorkoutRequest = (id: string) => {
+    workoutToDelete.value = id
+    deleteType.value = 'workout'
+    modalTitle.value = '¿Eliminar rutina?'
+    modalMessage.value = 'Se eliminará la rutina y sus ejercicios configurados.'
+    showDeleteModal.value = true
+    selectedWorkout.value = null // Close sheet
+}
+
 
 const confirmDelete = (sessionId: string) => {
   sessionToDelete.value = sessionId
   deleteType.value = 'history'
   modalTitle.value = '¿Eliminar historial?'
   modalMessage.value = 'Se eliminará este registro de entrenamiento.'
-  showDeleteModal.value = true
-}
-
-const toggleOptionsMenu = (workoutId: string) => {
-  if (openMenuId.value === workoutId) {
-    openMenuId.value = null
-  } else {
-    openMenuId.value = workoutId
-  }
-}
-
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.options-menu-container')) {
-    openMenuId.value = null
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
-
-const confirmDeleteWorkout = (workoutId: string) => {
-  openMenuId.value = null // Close menu
-  workoutToDelete.value = workoutId
-  deleteType.value = 'workout'
-  modalTitle.value = '¿Eliminar rutina?'
-  modalMessage.value = 'Se eliminará la rutina y sus ejercicios configurados.'
   showDeleteModal.value = true
 }
 
@@ -357,50 +431,6 @@ const goToHistoryDetail = (sessionId: string) => {
   gap: var(--spacing-sm);
 }
 
-.options-menu-container {
-  position: relative;
-}
-
-.options-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: var(--spacing-xs);
-  padding: var(--spacing-xs);
-  min-width: 120px;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.btn-menu-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: none;
-  background-color: transparent;
-  color: var(--color-text);
-  font-size: 0.9rem;
-  text-align: left;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-.btn-menu-item:hover {
-  background-color: var(--color-background-muted);
-}
-
-.btn-menu-item.danger {
-  color: var(--color-danger);
-}
-
-.btn-menu-item.danger:hover {
-  background-color: var(--color-danger-muted);
-}
-
 .header-actions {
   display: flex;
   align-items: center;
@@ -431,5 +461,54 @@ const goToHistoryDetail = (sessionId: string) => {
 .history-meta {
   margin: 0;
   font-size: 0.85rem;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.mr-2 {
+    margin-right: 0.5rem;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background-color: var(--color-border);
+    z-index: 1;
+}
+
+.divider-text {
+    background-color: var(--color-surface);
+    padding: 0 var(--spacing-sm);
+    z-index: 2;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 </style>

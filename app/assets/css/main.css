@@ -1,5 +1,7 @@
 :root {
   /* Colors */
+  --z-index-fab: 100;
+  --z-index-modal: 1000;
   --color-bg: #000000;
   --color-surface: #121212;
   --color-surface-elevated: #1a1a1a;
