@@ -2,186 +2,219 @@
   <div v-if="activeSession" class="session-page">
     <!-- Header -->
     <header class="session-header">
-      <NuxtLink to="/" class="btn-back">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
-        Volver
-      </NuxtLink>
-      <button class="btn btn-sm btn-finish" @click="finish">
-        Terminar
-      </button>
+      <div class="header-left">
+        <NuxtLink to="/" class="btn-back">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+          Volver
+        </NuxtLink>
+      </div>
+      <div class="header-center">
+        <div class="timer-display">{{ formatTime(elapsed) }}</div>
+      </div>
+      <div class="header-right">
+        <!-- Finish button removed from header as requested -->
+      </div>
     </header>
 
-    <!-- Session Info & Timer -->
-    <div class="session-info mb-6">
-      <h1 class="session-title">{{ activeSession.name }}</h1>
-      <div class="timer-display">{{ formatTime(elapsed) }}</div>
-    </div>
+    <!-- Content Area (Scrollable) -->
+    <div class="session-content">
+      
+      <!-- EXERCISE VIEW -->
+      <div v-if="!isFinishScreen" class="exercise-view">
+        <div class="exercise-header-block mb-6">
+           <div class="pagination-dots mb-2">
+             <span 
+                v-for="(ex, idx) in activeSession.exercises" 
+                :key="idx"
+                class="dot"
+                :class="{ active: idx === activeSession.currentExerciseIndex, completed: isExerciseComplete(ex) }"
+             ></span>
+             <span class="dot finish-dot" :class="{ active: isFinishScreen }"></span>
+           </div>
+           
+           <h1 class="exercise-title">{{ currentExercise.name }}</h1>
+           <div class="target-summary text-muted">
+              Objetivo: {{ currentExercise.targetSets || 3 }} series × {{ currentExercise.targetReps || 10 }} reps
+           </div>
 
-    <!-- Exercises -->
-    <div class="exercises-container">
-      <div v-for="(exercise, exIndex) in activeSession.exercises" :key="exIndex">
-        
-        <!-- Active Exercise (Expanded) -->
-        <div v-if="activeSession.currentExerciseIndex === exIndex" class="exercise-active card mb-4">
-          <div class="exercise-header">
-            <h2 class="exercise-name">{{ exercise.name }}</h2>
-            <span class="exercise-badge">Activo</span>
-          </div>
-          
-          <!-- Target Info -->
-          <div v-if="exercise.targetSets || exercise.targetReps || exercise.targetWeight" class="target-info mb-4">
-            <span class="target-label">Objetivo:</span>
-            <span class="target-value">
-              {{ exercise.targetSets || '?' }} series × 
-              {{ exercise.targetReps || '?' }} reps
-              <template v-if="exercise.targetWeight > 0"> @ {{ exercise.targetWeight }}kg</template>
-            </span>
-          </div>
-          
-          <!-- Notes -->
-          <div v-if="exercise.notes" class="exercise-notes mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="notes-icon">
-              <path d="M12 20h9"/>
-              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-            </svg>
-            <span class="notes-text">{{ exercise.notes }}</span>
-          </div>
-          
-          <!-- Progress Indicator -->
-          <div class="progress-bar mb-4" v-if="exercise.targetSets">
-            <div 
-              class="progress-fill" 
-              :style="{ width: Math.min(100, (exercise.sets.length / exercise.targetSets) * 100) + '%' }"
-            ></div>
-            <span class="progress-text">{{ exercise.sets.length }}/{{ exercise.targetSets }} series</span>
-          </div>
-          
-          <!-- Completed Sets -->
-          <div v-if="exercise.sets.length > 0" class="sets-list mb-4">
-            <div v-for="(set, setIndex) in exercise.sets" :key="setIndex" class="set-row">
-              <div class="set-info">
-                <span class="set-number">#{{ Number(setIndex) + 1 }}</span>
-                <span class="set-data">
-                  {{ set.weight > 0 ? `${set.weight}kg × ` : '' }}{{ set.reps }} reps
-                </span>
-              </div>
-              <div class="set-actions">
-                <span class="set-check">✓</span>
-                <button 
-                  class="btn-icon danger" 
-                  @click="removeSet(exercise, Number(setIndex))"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 6L6 18"/><path d="M6 6l12 12"/>
-                  </svg>
-                </button>
-              </div>
+            <!-- Sets Progress Bar -->
+            <div class="sets-progress-bar mt-2">
+               <div 
+                  class="sets-progress-fill" 
+                  :style="{ width: Math.min((currentExercise.sets.length / (currentExercise.targetSets || 3)) * 100, 100) + '%' }"
+               ></div>
             </div>
-          </div>
 
-          <!-- Session Notes -->
-          <div class="session-notes-form mt-4">
-            <label class="label-sm">Notas de la Sesión</label>
-            <textarea
-              v-model="exercise.sessionNotes"
-              class="input"
-              placeholder="Añade una nota sobre este ejercicio..."
-              rows="3"
-            ></textarea>
-          </div>
-
-          <!-- Add Set Form -->
-          <div class="add-set-form">
-            <div class="input-grid mb-4">
-              <div class="input-group">
-                <label class="label-sm">Reps</label>
-                <input 
-                  type="number" 
-                  inputmode="numeric" 
-                  v-model="exercise.currentReps" 
-                  class="input input-giant"
-                  placeholder="0"
-                  @focus="($event.target as HTMLInputElement).select()"
-                />
-              </div>
-              <div class="input-group">
-                <label class="label-sm">Kg</label>
-                <input 
-                  type="number" 
-                  inputmode="decimal" 
-                  v-model="exercise.currentWeight" 
-                  class="input input-giant"
-                  placeholder="0"
-                  @focus="($event.target as HTMLInputElement).select()"
-                />
-              </div>
+            <!-- Notes Section -->
+            <div v-if="currentExercise.notes" class="notes-section mt-4">
+               <div class="notes-label">Notas:</div>
+               <p class="notes-text">{{ currentExercise.notes }}</p>
             </div>
-            <button class="btn btn-primary btn-add-set" @click="logSet(exercise)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-              Añadir Serie
-            </button>
-          </div>
         </div>
 
-        <!-- Inactive Exercise (Collapsed) -->
-        <div 
-          v-else 
-          class="exercise-collapsed card card-interactive mb-2"
-          @click="activeSession.currentExerciseIndex = exIndex"
-        >
-          <div class="row-between">
-            <div class="collapsed-info">
-              <h3 class="collapsed-name">{{ exercise.name }}</h3>
-              <span class="collapsed-sets text-muted">
-                {{ exercise.sets.length }}<template v-if="exercise.targetSets">/{{ exercise.targetSets }}</template> series
-              </span>
-            </div>
-            <div class="collapsed-right">
-              <span v-if="exercise.targetSets && exercise.sets.length >= exercise.targetSets" class="completed-badge">✓</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="collapsed-chevron">
-                <path d="M9 18l6-6-6-6"/>
-              </svg>
-            </div>
-          </div>
+        <!-- Sets List -->
+        <div class="sets-container mb-6">
+           <div v-if="currentExercise.sets.length === 0" class="empty-sets-state">
+              <p>Sin series registradas</p>
+           </div>
+           <div v-else class="sets-list">
+              <div v-for="(set, idx) in currentExercise.sets" :key="idx" class="set-row">
+                 <div class="set-idx">#{{ idx + 1 }}</div>
+                 <div class="set-details">
+                    <span class="set-weight">{{ set.weight }}kg</span>
+                    <span class="set-reps">{{ set.reps }} reps</span>
+                 </div>
+                 <button class="btn-icon danger sm" @click="removeSet(currentExercise, idx)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                 </button>
+              </div>
+           </div>
+        </div>
+
+        <!-- Input Controls area -->
+        <div class="controls-area">
+           <!-- Reps Control -->
+           <div class="control-row mb-4">
+              <label class="control-label">REPS</label>
+              <div class="control-group">
+                 <button class="btn-control" @click="adjustReps(-1)">
+                    <span>-</span>
+                 </button>
+                 <input 
+                    type="number" 
+                    inputmode="numeric" 
+                    v-model="currentExercise.currentReps"
+                    class="input-control"
+                    @focus="($event.target as HTMLInputElement).select()"
+                 />
+                 <button class="btn-control" @click="adjustReps(1)">
+                    <span>+</span>
+                 </button>
+              </div>
+           </div>
+
+           <!-- Weight Control -->
+           <div class="control-row mb-4">
+              <label class="control-label">KG</label>
+              <div class="control-group">
+                 <button class="btn-control" @click="adjustWeight(-2.5)">
+                    <span>-</span>
+                 </button>
+                 <input 
+                    type="number" 
+                    inputmode="decimal" 
+                    v-model="currentExercise.currentWeight"
+                    class="input-control"
+                    @focus="($event.target as HTMLInputElement).select()"
+                 />
+                 <button class="btn-control" @click="adjustWeight(2.5)">
+                    <span>+</span>
+                 </button>
+              </div>
+           </div>
+
+           <button class="btn btn-primary btn-lg w-full" @click="logSet(currentExercise)">
+              REGISTRAR SERIE
+           </button>
         </div>
       </div>
 
-      <!-- Add Exercise Button -->
-      <button class="btn btn-secondary mt-4" @click="addAdHocExercise">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 5v14M5 12h14"/>
-        </svg>
-        Añadir Ejercicio
-      </button>
+      <!-- FINISH SCREEN -->
+      <div v-else class="finish-view">
+         <div class="finish-card">
+            <h2>¡Sesión Completada!</h2>
+            <div class="summary-stats mb-6">
+               <div class="stat-item">
+                  <span class="stat-val">{{ activeSession.exercises.length }}</span>
+                  <span class="stat-label">Ejercicios</span>
+               </div>
+               <div class="stat-item">
+                  <span class="stat-val">{{ totalSetsComputed }}</span>
+                  <span class="stat-label">Series</span>
+               </div>
+               <div class="stat-item">
+                  <span class="stat-val">{{ formatTime(elapsed) }}</span>
+                  <span class="stat-label">Tiempo</span>
+               </div>
+            </div>
+            
+            <button class="btn btn-primary btn-lg w-full mb-4" @click="confirmFinish">
+               GUARDAR ENTRENAMIENTO
+            </button>
+            <button class="btn btn-secondary w-full" @click="isFinishScreen = false">
+               VOLVER
+            </button>
+         </div>
+      </div>
+
     </div>
+
+    <!-- Sticky Navigation Footer -->
+    <div class="session-footer">
+       <!-- Integrated Progress Bar -->
+       <div class="footer-progress-track">
+         <div 
+            v-for="(ex, idx) in activeSession.exercises" 
+            :key="idx"
+            class="progress-segment"
+         >
+            <div 
+               class="progress-fill" 
+               :style="{ 
+                  width: idx < activeSession.currentExerciseIndex ? '100%' : 
+                         idx === activeSession.currentExerciseIndex && !isFinishScreen ? Math.min((ex.sets.length / (ex.targetSets || 3)) * 100, 100) + '%' : '0%' 
+               }"
+            ></div>
+         </div>
+       </div>
+
+       <button 
+          class="btn-nav" 
+          :disabled="isFirstExercise"
+          @click="prevExercise"
+       >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Anterior
+       </button>
+
+       <div class="nav-indicator">
+          {{ isFinishScreen ? 'FIN' : `${activeSession.currentExerciseIndex + 1} / ${activeSession.exercises.length}` }}
+       </div>
+
+       <button 
+          class="btn-nav" 
+          @click="nextExercise"
+       >
+          <span v-if="isLastExercise && !isFinishScreen">TERMINAR</span>
+          <span v-else-if="isFinishScreen"></span>
+          <span v-else>SIGUIENTE</span>
+          <svg v-if="!isFinishScreen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+       </button>
+    </div>
+
+    <!-- Modals -->
+    <ConfirmModal 
+      :show="showFinishModal"
+      title="¿Terminar entrenamiento?"
+      message="¿Seguro que quieres terminar?"
+      confirmText="TERMINAR"
+      cancelText="CANCELAR"
+      confirmType="danger"
+      @confirm="confirmFinish"
+      @cancel="showFinishModal = false"
+    />
+    
+    <InputModal
+      :show="showExerciseModal"
+      title="Nuevo Ejercicio"
+      placeholder="Nombre del ejercicio"
+      @confirm="confirmAddExercise"
+      @cancel="showExerciseModal = false"
+    />
+
   </div>
-
-  <!-- Loading State -->
-  <div v-else class="loading-state">
-    <p class="text-muted">Cargando sesión...</p>
-    <NuxtLink to="/" class="btn btn-secondary">Volver al Inicio</NuxtLink>
-  </div>
-
-  <!-- Modals -->
-  <ConfirmModal 
-    :show="showFinishModal"
-    title="¿Terminar entrenamiento?"
-    message="Se guardará el progreso en el historial."
-    @confirm="confirmFinish"
-    @cancel="showFinishModal = false"
-  />
-
-  <InputModal
-    :show="showExerciseModal"
-    title="Nuevo Ejercicio"
-    placeholder="Ej: Press de Banca"
-    @confirm="confirmAddExercise"
-    @cancel="showExerciseModal = false"
-  />
 </template>
 
 <script setup lang="ts">
@@ -189,49 +222,73 @@ const route = useRoute()
 const router = useRouter()
 const { activeSession, finishSession } = useWorkouts()
 const showFinishModal = ref(false)
+const showExerciseModal = ref(false)
+const isFinishScreen = ref(false)
 
-// Timer
 const elapsed = ref(0)
 let timerInterval: any = null
 
-onMounted(() => {
-  if (!activeSession.value || activeSession.value.id !== route.params.id) {
-    // Session not found - could redirect
-  }
+/* --- COMPUTED --- */
+const currentExercise = computed(() => {
+   if (!activeSession.value) return {}
+   return activeSession.value.exercises[activeSession.value.currentExerciseIndex] || {}
+})
 
+const isFirstExercise = computed(() => activeSession.value?.currentExerciseIndex === 0 && !isFinishScreen.value)
+const isLastExercise = computed(() => activeSession.value?.currentExerciseIndex === activeSession.value.exercises.length - 1)
+const totalSetsComputed = computed(() => {
+   if (!activeSession.value) return 0
+   return activeSession.value.exercises.reduce((acc: number, ex: any) => acc + ex.sets.length, 0)
+})
+
+/* --- LIFECYCLE --- */
+onMounted(() => {
+  if (!activeSession.value) return 
+
+  // Initialize timer
   const updateTimer = () => {
     if (activeSession.value) {
       const start = new Date(activeSession.value.startTime).getTime()
       elapsed.value = Math.floor((Date.now() - start) / 1000)
     }
   }
-  
   updateTimer()
   timerInterval = setInterval(updateTimer, 1000)
 
-  // Initialize inputs with smart defaults from targets
-  if (activeSession.value) {
-    if (typeof activeSession.value.currentExerciseIndex === 'undefined') {
-       activeSession.value.currentExerciseIndex = 0
-    }
-    activeSession.value.exercises.forEach((e: any) => {
-      // Use target values as defaults
-      if (e.currentWeight === undefined) e.currentWeight = e.targetWeight || 0
-      if (e.currentReps === undefined) e.currentReps = e.targetReps || 10
-      if (e.sessionNotes === undefined) e.sessionNotes = ''
-    })
-  }
+  // Init defaults
+  initCurrentExerciseDefaults()
 })
+
+watch(() => activeSession.value?.currentExerciseIndex, () => {
+   initCurrentExerciseDefaults()
+})
+
+const initCurrentExerciseDefaults = () => {
+    if (!currentExercise.value) return
+    if (currentExercise.value.currentWeight === undefined) currentExercise.value.currentWeight = currentExercise.value.targetWeight || 0
+    if (currentExercise.value.currentReps === undefined) currentExercise.value.currentReps = currentExercise.value.targetReps || 10
+}
 
 onUnmounted(() => {
   if (timerInterval) clearInterval(timerInterval)
 })
 
+/* --- METHODS --- */
 const formatTime = (seconds: number) => {
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0')
   const s = (seconds % 60).toString().padStart(2, '0')
   return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`
+}
+
+const adjustReps = (delta: number) => {
+   const val = Number(currentExercise.value.currentReps || 0) + delta
+   currentExercise.value.currentReps = Math.max(0, val)
+}
+
+const adjustWeight = (delta: number) => {
+   const val = Number(currentExercise.value.currentWeight || 0) + delta
+   currentExercise.value.currentWeight = Math.max(0, val)
 }
 
 const logSet = (exercise: any) => {
@@ -248,10 +305,40 @@ const removeSet = (exercise: any, index: number) => {
   exercise.sets.splice(index, 1)
 }
 
-const showExerciseModal = ref(false)
+const isExerciseComplete = (ex: any) => {
+    return ex.sets && ex.sets.length >= (ex.targetSets || 3)
+}
 
-const addAdHocExercise = () => {
-  showExerciseModal.value = true
+/* --- NAVIGATION --- */
+const nextExercise = () => {
+    if (isFinishScreen.value) return
+
+    if (isLastExercise.value) {
+        isFinishScreen.value = true
+    } else {
+        activeSession.value.currentExerciseIndex++
+    }
+}
+
+const prevExercise = () => {
+    if (isFinishScreen.value) {
+        isFinishScreen.value = false
+        activeSession.value.currentExerciseIndex = activeSession.value.exercises.length - 1
+    } else {
+        if (activeSession.value.currentExerciseIndex > 0) {
+            activeSession.value.currentExerciseIndex--
+        }
+    }
+}
+
+/* --- ACTIONS --- */
+const finish = () => {
+  showFinishModal.value = true
+}
+
+const confirmFinish = () => {
+  finishSession()
+  router.push('/')
 }
 
 const confirmAddExercise = (name: string) => {
@@ -263,269 +350,381 @@ const confirmAddExercise = (name: string) => {
       targetReps: 10,
       targetWeight: 0,
       currentWeight: 0,
+      targetWeight: 0,
+      currentWeight: 0,
       currentReps: 10,
-      sessionNotes: ''
+      notes: ''
     })
+    // Jump to the new exercise
     activeSession.value.currentExerciseIndex = activeSession.value.exercises.length - 1
+    isFinishScreen.value = false
   }
   showExerciseModal.value = false
 }
 
-const finish = () => {
-  showFinishModal.value = true
-}
-
-const confirmFinish = () => {
-  finishSession()
-  router.push('/')
-}
 </script>
 
 <style scoped>
 .session-page {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background-color: black;
+  /* Add padding to container so floating elements have spacing from edges */
+  padding: var(--spacing-sm);
+  gap: var(--spacing-sm);
 }
 
-/* Header */
 .session-header {
+  flex-shrink: 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  /* Transparent header as requested */
+}
+
+.header-left, .header-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    justify-content: flex-end;
+}
+
+.header-center {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .btn-finish {
   background-color: var(--color-danger);
   color: white;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  min-height: var(--touch-target-min);
-  width: auto;
-  flex-shrink: 0;
-}
-
-.btn-finish:active {
-  background-color: #e03d3d;
-}
-
-/* Session Info */
-.session-info {
-  text-align: center;
-}
-
-.session-title {
-  font-size: 1.25rem;
-  color: var(--color-text);
-  text-transform: none;
-  margin-bottom: var(--spacing-sm);
-}
-
-/* Exercises */
-.exercises-container {
-  flex: 1;
-}
-
-/* Active Exercise Card */
-.exercise-active {
-  border-left: 4px solid var(--color-primary);
-  padding: var(--spacing-lg);
-}
-
-.exercise-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-md);
-}
-
-.exercise-name {
-  margin: 0;
-  font-size: 1.25rem;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
-/* Target Info */
-.target-info {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--color-primary-dim);
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
+.timer-display {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    /* Remove pill background for cleaner, airier look, or keep it? 
+       User asked for "better UI/UX... symmetrical". 
+       A centered plain text might look cleaner and more symmetrical with the "Volver" text. 
+       Let's try removing the background and making it match the text style but colored. 
+       OR keep the pill but perfect center. 
+       I'll keep the pill but make it slightly more subtle or standard. 
+       Actually, aligning it with "Volver" (text) suggests maybe just text is better? 
+       But "Volver" is a button.
+       Let's stick to perfect centering first. */
+    background-color: var(--color-surface);
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
 }
 
-.target-label {
-  color: var(--color-text-muted);
+.session-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Important for flex scroll */
+    padding-bottom: 70px; /* Space for footer */
 }
 
-.target-value {
-  color: var(--color-primary);
-  font-weight: 600;
+/* EXERCISE VIEW: Flex column to manage scroll vs fixed */
+.exercise-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-/* Exercise Notes */
-.exercise-notes {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  font-style: italic;
+.exercise-header-block {
+    flex-shrink: 0;
+    margin-bottom: var(--spacing-sm);
+    padding: 0 var(--spacing-xs);
 }
 
-.notes-icon {
-  flex-shrink: 0;
+.exercise-title {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+    line-height: 1.1;
+}
+
+.notes-section {
+    background-color: var(--color-surface-elevated);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-primary);
+    margin-top: var(--spacing-sm);
+}
+
+.notes-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 4px;
 }
 
 .notes-text {
-  line-height: 1.4;
+    font-size: 0.9rem;
+    color: var(--color-text);
+    margin: 0;
+    line-height: 1.4;
+    white-space: pre-wrap;
 }
 
-/* Progress Bar */
-.progress-bar {
-  position: relative;
-  height: 8px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-full);
-  overflow: hidden;
+/* SETS LIST: Grows and scrolls */
+.sets-container {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: var(--spacing-sm);
+    min-height: 60px; /* Ensure at least some list is visible */
 }
 
-.progress-fill {
-  height: 100%;
-  background-color: var(--color-primary);
-  border-radius: var(--radius-full);
-  transition: width 0.3s ease;
-}
-
-.progress-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 0;
-  visibility: hidden;
-}
-
-/* Sets List */
 .sets-list {
-  border-radius: var(--radius-md);
-  background-color: rgba(0, 0, 0, 0.3);
-  overflow: hidden;
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
 }
 
 .set-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+    min-height: 44px;
 }
 
-.set-row:last-child {
-  border-bottom: none;
+.set-row:last-child { border-bottom: none; }
+
+.set-idx {
+    color: var(--color-text-muted);
+    font-weight: 600;
+    width: 40px;
 }
 
-.set-info {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
+.set-details {
+    flex: 1;
+    font-weight: 700;
+    display: flex;
+    gap: var(--spacing-md);
 }
 
-.set-number {
-  color: var(--color-text-muted);
-  font-weight: 600;
-  min-width: 32px;
+/* CONTROLS: Fixed height, never scrolls away */
+.controls-area {
+    flex-shrink: 0;
+    background-color: var(--color-surface);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg); /* Rounded card */
+    border: 1px solid var(--color-border);
 }
 
-.set-data {
-  color: var(--color-text-secondary);
+.control-row {
+    margin-bottom: var(--spacing-md);
+    padding: 0;
 }
 
-.set-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+.control-row:last-of-type {
+    margin-bottom: var(--spacing-md);
 }
 
-.set-check {
-  color: var(--color-primary);
-  font-weight: bold;
+.control-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    display: block;
 }
 
-/* Add Set Form */
-.add-set-form {
-  margin-top: var(--spacing-lg);
+.control-group {
+    display: grid;
+    grid-template-columns: 56px 1fr 56px; /* Slightly smaller button to save space */
+    gap: var(--spacing-md);
+    align-items: center;
 }
 
-.input-group {
-  display: flex;
-  flex-direction: column;
+.btn-control {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background-color: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
+    color: white;
+    font-size: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
-.btn-add-set {
-  font-size: 1.1rem;
-  padding: var(--spacing-lg);
+.btn-control span {
+    margin-top: -4px;
 }
 
-/* Collapsed Exercise */
-.exercise-collapsed {
-  padding: var(--spacing-md) var(--spacing-lg);
+.btn-control:active {
+    background-color: var(--color-border);
+    transform: scale(0.96);
 }
 
-.collapsed-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
+.btn-control.primary {
+    background-color: var(--color-primary);
+    color: black;
+    border: none;
 }
 
-.collapsed-name {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  text-transform: uppercase;
+.input-control {
+    width: 100%;
+    height: 56px;
+    background: transparent;
+    border: none;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    padding: 0;
+    font-variant-numeric: tabular-nums;
 }
 
-.collapsed-sets {
-  font-size: 0.85rem;
+/* Finish Screen */
+.finish-view {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.collapsed-right {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+.finish-card {
+    text-align: center;
+    width: 100%;
 }
 
-.collapsed-chevron {
-  color: var(--color-text-muted);
+.summary-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
 }
 
-.completed-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background-color: var(--color-primary);
-  color: black;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: bold;
+.stat-item {
+    display: flex;
+    flex-direction: column;
 }
 
-/* Loading State */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-2xl);
-  text-align: center;
+.stat-val {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+/* Footer */
+.session-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    padding: var(--spacing-sm) var(--spacing-md);
+    padding-bottom: calc(var(--spacing-sm) + var(--safe-area-bottom));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.footer-progress-track {
+    position: absolute;
+    top: -4px; /* Move slightly up to sit on the border or just above content? Let's try sitting ON the top edge */
+    left: 0;
+    right: 0;
+    height: 4px;
+    display: flex;
+    gap: 2px;
+    background-color: var(--color-bg); /* Gap color */
+}
+
+.progress-segment {
+    flex: 1;
+    height: 100%;
+    background-color: var(--color-surface-elevated);
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--color-primary);
+    transition: width 0.3s ease;
+}
+
+.btn-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    color: var(--color-text);
+    padding: var(--spacing-xs) var(--spacing-md);
+    min-width: 60px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-nav:disabled {
+    opacity: 0.3;
+}
+
+.nav-indicator {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+/* Custom Scrollbar for Session Page */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface); 
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border); 
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted); 
 }
 </style>

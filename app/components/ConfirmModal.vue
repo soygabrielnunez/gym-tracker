@@ -6,8 +6,14 @@
           <h3 class="modal-title">{{ title }}</h3>
           <p class="modal-message">{{ message }}</p>
           <div class="modal-actions">
-            <button class="btn btn-secondary" @click="$emit('cancel')">Cancelar</button>
-            <button class="btn btn-primary" @click="$emit('confirm')">Confirmar</button>
+            <button class="btn btn-secondary" @click="$emit('cancel')">{{ cancelText || 'Cancelar' }}</button>
+            <button 
+              class="btn" 
+              :class="confirmType === 'danger' ? 'btn-danger' : 'btn-primary'"
+              @click="$emit('confirm')"
+            >
+              {{ confirmText || 'Confirmar' }}
+            </button>
           </div>
         </div>
       </div>
@@ -20,6 +26,9 @@ defineProps<{
   show: boolean
   title: string
   message: string
+  confirmText?: string
+  cancelText?: string
+  confirmType?: 'primary' | 'danger'
 }>()
 
 defineEmits(['confirm', 'cancel'])
@@ -131,5 +140,11 @@ defineEmits(['confirm', 'cancel'])
   .modal-actions {
     flex-direction: row;
   }
+}
+
+.btn-danger {
+  background-color: var(--color-danger);
+  color: white;
+  border: none;
 }
 </style>
