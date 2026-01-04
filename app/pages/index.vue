@@ -160,6 +160,13 @@ dayjs.locale('es')
 dayjs.extend(isToday)
 dayjs.extend(isYesterday)
 
+import relativeTime from 'dayjs/plugin/relativeTime'
+
+dayjs.locale('es')
+dayjs.extend(isToday)
+dayjs.extend(isYesterday)
+dayjs.extend(relativeTime)
+
 const { workouts, activeSession, startSession, shareWorkout } = useWorkouts()
 const router = useRouter()
 
@@ -279,14 +286,13 @@ const closeDeleteModal = () => {
 const formatHistoryDate = (isoString: string) => {
   if (!isoString) return ''
   const date = dayjs(isoString)
-  const time = date.format('HH:mm')
   
   if (date.isToday()) {
-    return `Hoy, ${time}`
+    return 'Hoy'
   } else if (date.isYesterday()) {
-    return `Ayer, ${time}`
+    return 'Ayer'
   } else {
-    return `${date.format('D MMM')}, ${time}`
+    return date.fromNow()
   }
 }
 
