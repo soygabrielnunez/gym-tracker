@@ -113,7 +113,7 @@
             <div class="history-info">
               <h3 class="history-name">{{ session.name }}</h3>
               <p class="history-meta text-muted">
-                {{ formatDate(session.endTime) }} • {{ session.exercises.length }} ejercicios
+                {{ formatHistoryDate(session.endTime) }} • {{ calculateDuration(session.startTime, session.endTime) }} • {{ session.exercises.length }} ejercicios
               </p>
             </div>
             <button 
@@ -151,6 +151,15 @@
 </template>
 
 <script setup lang="ts">
+import dayjs from 'dayjs'
+import 'dayjs/locale/es'
+import isToday from 'dayjs/plugin/isToday'
+import isYesterday from 'dayjs/plugin/isYesterday'
+
+dayjs.locale('es')
+dayjs.extend(isToday)
+dayjs.extend(isYesterday)
+
 const { workouts, activeSession, startSession, shareWorkout } = useWorkouts()
 const router = useRouter()
 
@@ -267,13 +276,30 @@ const closeDeleteModal = () => {
   workoutToDelete.value = null
 }
 
-const formatDate = (isoString: string) => {
-  return new Date(isoString).toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+const formatHistoryDate = (isoString: string) => {
+  if (!isoString) return ''
+  const date = dayjs(isoString)
+  const time = date.format('HH:mm')
+  
+  if (date.isToday()) {
+    return `Hoy, ${time}`
+  } else if (date.isYesterday()) {
+    return `Ayer, ${time}`
+  } else {
+    return `${date.format('D MMM')}, ${time}`
+  }
+}
+
+const calculateDuration = (start: string, end: string) => {
+  if (!start || !end) return ''
+  const diff = dayjs(end).diff(dayjs(start), 'minute')
+  
+  if (diff >= 60) {
+    const hours = Math.floor(diff / 60)
+    const minutes = diff % 60
+    return `${hours}h ${minutes}m`
+  }
+  return `${diff}m`
 }
 
 const goToHistoryDetail = (sessionId: string) => {
