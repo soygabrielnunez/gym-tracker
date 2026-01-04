@@ -11,7 +11,7 @@
         </NuxtLink>
       </div>
       <div class="header-center">
-        <div class="timer-display">{{ formatTime(elapsed) }}</div>
+
       </div>
       <div class="header-right">
         <!-- Finish button removed from header as requested -->
@@ -180,7 +180,7 @@
        </button>
 
        <div class="nav-indicator">
-          {{ isFinishScreen ? 'FIN' : `${activeSession.currentExerciseIndex + 1} / ${activeSession.exercises.length}` }}
+          {{ formatTime(elapsed) }}
        </div>
 
        <button 
