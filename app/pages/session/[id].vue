@@ -443,7 +443,6 @@ const confirmAddExercise = (name: string) => {
     display: flex;
     flex-direction: column;
     flex: 1;
-    justify-content: space-between; /* Pushes header to top, controls to bottom */
 }
 
 .exercise-header-block {
@@ -547,7 +546,7 @@ const confirmAddExercise = (name: string) => {
     justify-content: center;
 }
 
-/* (styles for footer, modals etc. remain the same) */
+/* Footer */
 .session-footer {
     position: fixed;
     bottom: 0;
@@ -572,5 +571,45 @@ const confirmAddExercise = (name: string) => {
     display: flex;
     gap: 2px;
     background-color: var(--color-bg);
+}
+
+.progress-segment {
+    flex: 1;
+    height: 100%;
+    background-color: var(--color-surface-elevated);
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--color-primary);
+    transition: width 0.3s ease;
+}
+
+.btn-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    color: var(--color-text);
+    padding: var(--spacing-xs) var(--spacing-md);
+    min-width: 60px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-nav:disabled {
+    opacity: 0.3;
+}
+
+.nav-indicator {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
 }
 </style>
