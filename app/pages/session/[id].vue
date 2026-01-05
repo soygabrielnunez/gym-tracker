@@ -311,12 +311,27 @@ const isExerciseComplete = (ex: any) => {
 
 /* --- NAVIGATION --- */
 const nextExercise = () => {
-    if (isFinishScreen.value) return
+    if (isFinishScreen.value) return;
 
-    if (isLastExercise.value) {
-        isFinishScreen.value = true
+    const currentIndex = activeSession.value.currentExerciseIndex;
+    const exercises = activeSession.value.exercises;
+    const currentExercise = exercises[currentIndex];
+
+    const isSkipped = currentExercise.sets.length === 0;
+    const remainingExercises = exercises.length - currentIndex;
+
+    // Re-queue the exercise if it's skipped, there's more than one exercise left, and it hasn't been skipped before
+    if (isSkipped && remainingExercises > 1 && !currentExercise.skipped) {
+        const [skippedExercise] = exercises.splice(currentIndex, 1);
+        skippedExercise.skipped = true; // Mark as skipped
+        exercises.push(skippedExercise);
+
+        // Force reactivity update and re-initialize defaults
+        initCurrentExerciseDefaults();
+    } else if (isLastExercise.value) {
+        isFinishScreen.value = true;
     } else {
-        activeSession.value.currentExerciseIndex++
+        activeSession.value.currentExerciseIndex++;
     }
 }
 
