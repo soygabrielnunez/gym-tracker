@@ -47,30 +47,17 @@
                ></div>
             </div>
 
-            <!-- Notes Section -->
-            <div v-if="currentExercise.notes" class="notes-section mt-4">
-               <div class="notes-label">Notas:</div>
-               <p class="notes-text">{{ currentExercise.notes }}</p>
+            <!-- Quick Actions Bar -->
+            <div class="quick-actions-bar">
+                <button class="btn-action" @click="showNotesModal = true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <span>Notas</span>
+                </button>
+                <button class="btn-action" @click="showSetsModal = true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <span>{{ currentExercise.sets.length }} Series</span>
+                </button>
             </div>
-        </div>
-
-        <!-- Sets List -->
-        <div class="sets-container mb-6">
-           <div v-if="currentExercise.sets.length === 0" class="empty-sets-state">
-              <p>Sin series registradas</p>
-           </div>
-           <div v-else class="sets-list">
-              <div v-for="(set, idx) in currentExercise.sets" :key="idx" class="set-row">
-                 <div class="set-idx">#{{ idx + 1 }}</div>
-                 <div class="set-details">
-                    <span class="set-weight">{{ set.weight }}kg</span>
-                    <span class="set-reps">{{ set.reps }} reps</span>
-                 </div>
-                 <button class="btn-icon danger sm" @click="removeSet(currentExercise, idx)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
-                 </button>
-              </div>
-           </div>
         </div>
 
         <!-- Input Controls area -->
@@ -195,6 +182,17 @@
     </div>
 
     <!-- Modals -->
+    <NotesModal
+      :show="showNotesModal"
+      v-model="currentExercise.notes"
+      @close="showNotesModal = false"
+    />
+    <SetsModal
+      :show="showSetsModal"
+      :sets="currentExercise.sets"
+      @close="showSetsModal = false"
+      @remove-set="removeSet"
+    />
     <ConfirmModal
       :show="showFinishModal"
       title="¿Descartar entrenamiento?"
@@ -218,12 +216,17 @@
 </template>
 
 <script setup lang="ts">
+import NotesModal from '~/components/NotesModal.vue'
+import SetsModal from '~/components/SetsModal.vue'
+
 const route = useRoute()
 const router = useRouter()
 const { activeSession, finishSession, cancelSession } = useWorkouts()
 const showFinishModal = ref(false)
 const showExerciseModal = ref(false)
 const isFinishScreen = ref(false)
+const showNotesModal = ref(false)
+const showSetsModal = ref(false)
 
 const elapsed = ref(0)
 let timerInterval: any = null
@@ -301,8 +304,8 @@ const logSet = (exercise: any) => {
   })
 }
 
-const removeSet = (exercise: any, index: number) => {
-  exercise.sets.splice(index, 1)
+const removeSet = (index: number) => {
+  currentExercise.value.sets.splice(index, 1)
 }
 
 const isExerciseComplete = (ex: any) => {
@@ -456,7 +459,7 @@ const confirmAddExercise = (name: string) => {
 .exercise-view {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 1;
 }
 
 .exercise-header-block {
@@ -471,70 +474,34 @@ const confirmAddExercise = (name: string) => {
     line-height: 1.1;
 }
 
-.notes-section {
-    background-color: var(--color-surface-elevated);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--radius-md);
-    border-left: 3px solid var(--color-primary);
-    margin-top: var(--spacing-sm);
+.quick-actions-bar {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    margin-top: var(--spacing-lg);
 }
 
-.notes-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    margin-bottom: 4px;
-}
-
-.notes-text {
-    font-size: 0.9rem;
-    color: var(--color-text);
-    margin: 0;
-    line-height: 1.4;
-    white-space: pre-wrap;
-}
-
-/* SETS LIST: Grows and scrolls */
-.sets-container {
+.btn-action {
     flex: 1;
-    overflow-y: auto;
-    margin-bottom: var(--spacing-sm);
-    min-height: 60px; /* Ensure at least some list is visible */
-}
-
-.sets-list {
-    background-color: var(--color-surface);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-}
-
-.set-row {
     display: flex;
     align-items: center;
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-bottom: 1px solid var(--color-border);
-    min-height: 44px;
-}
-
-.set-row:last-child { border-bottom: none; }
-
-.set-idx {
-    color: var(--color-text-muted);
+    justify-content: center;
+    gap: var(--spacing-sm);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
     font-weight: 600;
-    width: 40px;
 }
 
-.set-details {
-    flex: 1;
-    font-weight: 700;
-    display: flex;
-    gap: var(--spacing-md);
+.btn-action svg {
+    color: var(--color-text-muted);
 }
 
 /* CONTROLS: Fixed height, never scrolls away */
 .controls-area {
+    margin-top: auto;
     flex-shrink: 0;
     background-color: var(--color-surface);
     padding: var(--spacing-md);
