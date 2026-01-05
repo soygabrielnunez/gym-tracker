@@ -104,6 +104,10 @@ export const useWorkouts = () => {
         activeSession.value = null
     }
 
+    const cancelSession = () => {
+        activeSession.value = null
+    }
+
 
     const deleteSession = (sessionId: string) => {
         history.value = history.value.filter(s => s.id !== sessionId)
@@ -171,6 +175,7 @@ export const useWorkouts = () => {
         updateWorkout,
         startSession,
         finishSession,
+        cancelSession,
         deleteSession,
         deleteWorkout,
         shareWorkout,
