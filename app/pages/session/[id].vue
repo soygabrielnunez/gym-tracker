@@ -142,22 +142,7 @@
 
     <!-- Sticky Navigation Footer -->
     <div class="session-footer">
-       <!-- Integrated Progress Bar -->
-       <div class="footer-progress-track">
-         <div 
-            v-for="(ex, idx) in activeSession.exercises" 
-            :key="idx"
-            class="progress-segment"
-         >
-            <div 
-               class="progress-fill" 
-               :style="{ 
-                  width: idx < activeSession.currentExerciseIndex ? '100%' : 
-                         idx === activeSession.currentExerciseIndex && !isFinishScreen ? Math.min((ex.sets.length / (ex.targetSets || 3)) * 100, 100) + '%' : '0%' 
-               }"
-            ></div>
-         </div>
-       </div>
+       <!-- Progress Bar Removed -->
 
        <button 
           class="btn-nav" 
@@ -618,29 +603,6 @@ const confirmAddExercise = (name: string) => {
     z-index: 10;
 }
 
-.footer-progress-track {
-    position: absolute;
-    top: -4px;
-    left: 0;
-    right: 0;
-    height: 4px;
-    display: flex;
-    gap: 2px;
-    background-color: var(--color-bg);
-}
-
-.progress-segment {
-    flex: 1;
-    height: 100%;
-    background-color: var(--color-surface-elevated);
-    position: relative;
-}
-
-.progress-fill {
-    height: 100%;
-    background-color: var(--color-primary);
-    transition: width 0.3s ease;
-}
 
 .btn-nav {
     display: flex;
