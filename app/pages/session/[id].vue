@@ -11,7 +11,9 @@
         </NuxtLink>
       </div>
       <div class="header-center">
-
+         <div class="header-timer">
+           {{ formatTime(elapsed) }}
+         </div>
       </div>
       <div class="header-right">
         <button class="btn-finish" @click="finish">TERMINAR</button>
@@ -162,12 +164,15 @@
           :disabled="isFirstExercise"
           @click="prevExercise"
        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6-6-6"/></svg>
           Anterior
        </button>
 
        <div class="nav-indicator">
-          {{ formatTime(elapsed) }}
+         <button class="btn-list" @click="showListModal = true">
+           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+           <span>LISTA</span>
+         </button>
        </div>
 
        <button 
@@ -212,6 +217,14 @@
       @confirm="confirmAddExercise"
       @cancel="showExerciseModal = false"
     />
+    
+    <ExerciseListModal
+      :show="showListModal"
+      :exercises="activeSession.exercises"
+      :current-index="activeSession.currentExerciseIndex"
+      @close="showListModal = false"
+      @select-exercise="selectExercise"
+    />
 
   </div>
 </template>
@@ -219,6 +232,7 @@
 <script setup lang="ts">
 import NotesModal from '~/components/NotesModal.vue'
 import SetsModal from '~/components/SetsModal.vue'
+import ExerciseListModal from '~/components/ExerciseListModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -228,6 +242,7 @@ const showExerciseModal = ref(false)
 const isFinishScreen = ref(false)
 const showNotesModal = ref(false)
 const showSetsModal = ref(false)
+const showListModal = ref(false)
 
 const elapsed = ref(0)
 let timerInterval: any = null
@@ -339,6 +354,12 @@ const prevExercise = () => {
     }
 }
 
+const selectExercise = (index: number) => {
+    activeSession.value.currentExerciseIndex = index
+    isFinishScreen.value = false
+    showListModal.value = false
+}
+
 /* --- ACTIONS --- */
 const finish = () => {
   showFinishModal.value = true
@@ -413,6 +434,35 @@ const confirmAddExercise = (name: string) => {
 .header-center {
     display: flex;
     justify-content: center;
+    flex: 2; /* Give more space to center if needed */
+}
+
+.header-timer {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-text);
+    letter-spacing: 0.5px;
+}
+
+.btn-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-weight: 700;
+  font-size: 0.7rem;
+  padding: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-list svg {
+  color: var(--color-text);
 }
 
 .btn-back {
