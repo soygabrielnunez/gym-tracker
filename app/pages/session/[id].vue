@@ -147,11 +147,11 @@
        <button 
           class="btn-nav" 
           :disabled="isFirstExercise"
-          @click="prevExercise"
-       >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6-6-6"/></svg>
-          Anterior
-       </button>
+           @click="prevExercise"
+        >
+           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+           <span>Anterior</span>
+        </button>
 
        <div class="nav-indicator">
          <button class="btn-list" @click="showListModal = true">
@@ -161,14 +161,13 @@
        </div>
 
        <button 
-          class="btn-nav" 
-          @click="nextExercise"
-       >
-          <span v-if="isLastExercise && !isFinishScreen">TERMINAR</span>
-          <span v-else-if="isFinishScreen"></span>
-          <span v-else>SIGUIENTE</span>
-          <svg v-if="!isFinishScreen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-       </button>
+          class="btn-nav"           @click="nextExercise"
+        >
+           <svg v-if="!isFinishScreen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+           <span v-if="isLastExercise && !isFinishScreen">TERMINAR</span>
+           <span v-else-if="isFinishScreen"></span>
+           <span v-else>SIGUIENTE</span>
+        </button>
     </div>
 
     <!-- Modals -->
@@ -397,6 +396,7 @@ const confirmAddExercise = (name: string) => {
   top: 0;
   left: 0;
   width: 100%;
+  touch-action: manipulation; /* Disable double-tap zoom */
 }
 
 .session-header {
@@ -609,15 +609,21 @@ const confirmAddExercise = (name: string) => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: none;
+    gap: 4px;
     background: none;
-    color: var(--color-text);
-    padding: var(--spacing-xs) var(--spacing-md);
-    min-width: 60px;
-    font-size: 0.7rem;
+    border: none;
+    color: var(--color-text-muted);
     font-weight: 700;
+    font-size: 0.7rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    min-width: 60px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    height: 100%;
+}
+
+.btn-nav svg {
+    color: var(--color-text);
 }
 
 .btn-nav:disabled {
