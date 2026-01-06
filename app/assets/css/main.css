@@ -606,3 +606,124 @@ textarea {
     padding: var(--spacing-xl);
   }
 }
+
+/* --- Shared Bottom Sheet Modal Styles --- */
+.sheet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  /* Bottom sheet by default */
+  z-index: 1000;
+  padding: var(--spacing-md);
+  padding-bottom: calc(var(--spacing-md) + var(--safe-area-bottom));
+}
+
+.sheet-content {
+  background: var(--color-surface-elevated);
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  width: 100%;
+}
+
+.sheet-header {
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+}
+
+.sheet-title {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sheet-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xl);
+}
+
+/* Scrollable body if needed */
+.sheet-body {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (min-width: 768px) {
+  .sheet-overlay {
+    align-items: center;
+  }
+
+  .sheet-content {
+    border-radius: var(--radius-xl);
+    border-bottom: 1px solid var(--color-border);
+    max-width: 450px;
+    margin: 0;
+  }
+
+  .sheet-actions {
+    flex-direction: row;
+  }
+
+  .sheet-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Animations matching 'SALIR' / Bottom Sheet */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active .sheet-content {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-leave-active .sheet-content {
+  animation: slideDown 0.2s ease forwards;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
+}

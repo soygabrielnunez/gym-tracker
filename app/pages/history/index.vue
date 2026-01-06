@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div>
     <header class="section-header mb-6">
       <div class="header-left">
         <NuxtLink to="/" class="btn-back">
@@ -49,6 +49,8 @@
         :show="showDeleteModal"
         title="¿Eliminar historial?"
         message="Se eliminará este registro de entrenamiento permanentemente."
+        confirmText="ELIMINAR"
+        confirmType="danger"
         @confirm="handleDelete"
         @cancel="closeDeleteModal"
     />
