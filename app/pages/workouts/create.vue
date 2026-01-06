@@ -14,8 +14,9 @@
     
     <!-- Routine Name -->
     <div class="card mb-6">
-      <label class="label">Nombre de la Rutina</label>
+      <label class="label" for="routine-name">Nombre de la Rutina</label>
       <input 
+        id="routine-name"
         v-model="name" 
         class="input input-uppercase" 
         placeholder="Ej: PIERNA HIPERTROFIA" 
@@ -58,8 +59,9 @@
           <!-- Target Values -->
           <div class="exercise-targets">
             <div class="target-field">
-              <label class="label-sm">Series</label>
+              <label class="label-sm" :for="`sets-${index}`">Series</label>
               <input 
+                :id="`sets-${index}`"
                 type="number" 
                 inputmode="numeric"
                 v-model.number="exercise.targetSets" 
@@ -68,8 +70,9 @@
               />
             </div>
             <div class="target-field">
-              <label class="label-sm">Reps</label>
+              <label class="label-sm" :for="`reps-${index}`">Reps</label>
               <input 
+                :id="`reps-${index}`"
                 type="number" 
                 inputmode="numeric"
                 v-model.number="exercise.targetReps" 
@@ -78,8 +81,9 @@
               />
             </div>
             <div class="target-field">
-              <label class="label-sm">Kg</label>
+              <label class="label-sm" :for="`kg-${index}`">Kg</label>
               <input 
+                :id="`kg-${index}`"
                 type="number" 
                 inputmode="decimal"
                 v-model.number="exercise.targetWeight" 
