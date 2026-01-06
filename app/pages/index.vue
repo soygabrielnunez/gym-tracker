@@ -114,6 +114,8 @@
     :show="showDeleteModal"
     :title="modalTitle"
     :message="modalMessage"
+    :confirmText="confirmBtnText"
+    :confirmType="confirmBtnType"
     @confirm="handleDelete"
     @cancel="closeDeleteModal"
   />
@@ -249,6 +251,8 @@ const workoutToDelete = ref<string | null>(null) // Used for logic
 const deleteType = ref<'history' | 'workout'>('history')
 const modalTitle = ref('')
 const modalMessage = ref('')
+const confirmBtnText = ref('Confirmar')
+const confirmBtnType = ref<'primary' | 'danger'>('primary')
 
 // --- Bottom Sheet Logic ---
 const selectedWorkout = ref<any>(null)
@@ -272,6 +276,8 @@ const handleDeleteWorkoutRequest = (id: string) => {
     deleteType.value = 'workout'
     modalTitle.value = '¿Eliminar rutina?'
     modalMessage.value = 'Se eliminará la rutina y sus ejercicios configurados.'
+    confirmBtnText.value = 'ELIMINAR'
+    confirmBtnType.value = 'danger'
     showDeleteModal.value = true
     selectedWorkout.value = null // Close sheet
 }
@@ -282,6 +288,8 @@ const confirmDelete = (sessionId: string) => {
   deleteType.value = 'history'
   modalTitle.value = '¿Eliminar historial?'
   modalMessage.value = 'Se eliminará este registro de entrenamiento.'
+  confirmBtnText.value = 'ELIMINAR'
+  confirmBtnType.value = 'danger'
   showDeleteModal.value = true
 }
 
