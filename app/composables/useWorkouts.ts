@@ -1,24 +1,34 @@
 import { onMounted } from 'vue'
 
 export const useWorkouts = () => {
-    // State (persisted in localStorage would be ideal, but using useState for Nuxt reactivity)
-    // In a real app, use useStorage or pinia-plugin-persistedstate
-    // For this v1 local-first, we'll try to sync with localStorage in onMounted if possible
-
     const workouts = useState<any[]>('workouts', () => [])
     const history = useState<any[]>('history', () => [])
     const activeSession = useState<any>('activeSession', () => null)
 
-    // Load from localsotrage on client init
+    // Load from localStorage on client init
     onMounted(() => {
+        // Workouts
         const savedWorkouts = localStorage.getItem('gym-workouts')
         if (savedWorkouts) workouts.value = JSON.parse(savedWorkouts)
 
+        // History
         const savedHistory = localStorage.getItem('gym-history')
         if (savedHistory) history.value = JSON.parse(savedHistory)
 
+        // Active Session (with migration for sessionNotes)
         const savedSession = localStorage.getItem('gym-active-session')
-        if (savedSession) activeSession.value = JSON.parse(savedSession)
+        if (savedSession) {
+            const session = JSON.parse(savedSession)
+            // MIGRATION: Ensure sessionNotes exist on exercises
+            if (session.exercises && session.exercises.length > 0) {
+                session.exercises.forEach((ex: any) => {
+                    if (ex.sessionNotes === undefined) {
+                        ex.sessionNotes = ''
+                    }
+                })
+            }
+            activeSession.value = session
+        }
     })
 
     // Save changes watcher
@@ -62,25 +72,24 @@ export const useWorkouts = () => {
         }
     }
 
-    const startSession = (workoutId?: string) => {
-        let sessionBase = {
+    const startSession = (workoutId: string) => {
+        let sessionBase: any = {
             id: crypto.randomUUID(),
             startTime: new Date().toISOString(),
             currentExerciseIndex: 0,
             exercises: [],
-            name: 'Entrenamiento Libre'
+            name: 'Entrenamiento'
         }
 
-        if (workoutId) {
-            const workout = workouts.value.find(w => w.id === workoutId)
-            if (workout) {
-                sessionBase.name = workout.name
-                // Clone exercises structure
-                sessionBase.exercises = workout.exercises.map((e: any) => ({
-                    ...e,
-                    sets: [] // Empty sets for the session
-                }))
-            }
+        const workout = workouts.value.find(w => w.id === workoutId)
+        if (workout) {
+            sessionBase.name = workout.name
+            // Clone exercises structure
+            sessionBase.exercises = workout.exercises.map((e: any) => ({
+                ...e,
+                sets: [], // Empty sets for the session
+                sessionNotes: '' // Initialize sessionNotes
+            }))
         }
 
         activeSession.value = sessionBase
@@ -117,6 +126,7 @@ export const useWorkouts = () => {
         workouts.value = workouts.value.filter(w => w.id !== workoutId)
     }
 
+    // ... (shareWorkout and importWorkoutFromData remain the same)
     const shareWorkout = (workoutId: string) => {
         const workout = workouts.value.find(w => w.id === workoutId)
         if (!workout) return
@@ -138,7 +148,7 @@ export const useWorkouts = () => {
         const url = `${window.location.origin}/import/${encodedData}`
 
         navigator.clipboard.writeText(url).then(() => {
-            alert('¡Enlace para compartir copiado al portapapeles!')
+            alert('¡Enlace para compartir copiado al portapeles!')
         }).catch(err => {
             console.error('Error al copiar el enlace: ', err)
             alert('No se pudo copiar el enlace. Inténtalo de nuevo.')
@@ -166,6 +176,7 @@ export const useWorkouts = () => {
 
         workouts.value.push(newWorkout)
     }
+
 
     return {
         workouts,

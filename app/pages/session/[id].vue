@@ -23,7 +23,7 @@
       
       <!-- EXERCISE VIEW -->
       <div v-if="!isFinishScreen" class="exercise-view">
-        <div class="exercise-header-block mb-6">
+        <div class="exercise-header-block">
            <div class="pagination-dots mb-2">
              <span 
                 v-for="(ex, idx) in activeSession.exercises" 
@@ -47,36 +47,23 @@
                ></div>
             </div>
 
-            <!-- Notes Section -->
-            <div v-if="currentExercise.notes" class="notes-section mt-4">
-               <div class="notes-label">Notas:</div>
-               <p class="notes-text">{{ currentExercise.notes }}</p>
+            <!-- Quick Actions Bar -->
+            <div class="quick-actions-bar">
+                <button class="btn-action" @click="showNotesModal = true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <span>Notas</span>
+                </button>
+                <button class="btn-action" @click="showSetsModal = true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <span>{{ currentExercise.sets.length }} Series</span>
+                </button>
             </div>
-        </div>
-
-        <!-- Sets List -->
-        <div class="sets-container mb-6">
-           <div v-if="currentExercise.sets.length === 0" class="empty-sets-state">
-              <p>Sin series registradas</p>
-           </div>
-           <div v-else class="sets-list">
-              <div v-for="(set, idx) in currentExercise.sets" :key="idx" class="set-row">
-                 <div class="set-idx">#{{ idx + 1 }}</div>
-                 <div class="set-details">
-                    <span class="set-weight">{{ set.weight }}kg</span>
-                    <span class="set-reps">{{ set.reps }} reps</span>
-                 </div>
-                 <button class="btn-icon danger sm" @click="removeSet(currentExercise, idx)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
-                 </button>
-              </div>
-           </div>
         </div>
 
         <!-- Input Controls area -->
         <div class="controls-area">
            <!-- Reps Control -->
-           <div class="control-row mb-4">
+           <div class="control-row">
               <label class="control-label">REPS</label>
               <div class="control-group">
                  <button class="btn-control" @click="adjustReps(-1)">
@@ -96,7 +83,7 @@
            </div>
 
            <!-- Weight Control -->
-           <div class="control-row mb-4">
+           <div class="control-row">
               <label class="control-label">KG</label>
               <div class="control-group">
                  <button class="btn-control" @click="adjustWeight(-2.5)">
@@ -195,6 +182,18 @@
     </div>
 
     <!-- Modals -->
+    <NotesModal
+      :show="showNotesModal"
+      :base-notes="currentExercise.notes"
+      v-model="currentExercise.sessionNotes"
+      @close="showNotesModal = false"
+    />
+    <SetsModal
+      :show="showSetsModal"
+      :sets="currentExercise.sets"
+      @close="showSetsModal = false"
+      @remove-set="removeSet"
+    />
     <ConfirmModal
       :show="showFinishModal"
       title="¿Descartar entrenamiento?"
@@ -218,12 +217,17 @@
 </template>
 
 <script setup lang="ts">
+import NotesModal from '~/components/NotesModal.vue'
+import SetsModal from '~/components/SetsModal.vue'
+
 const route = useRoute()
 const router = useRouter()
 const { activeSession, finishSession, cancelSession } = useWorkouts()
 const showFinishModal = ref(false)
 const showExerciseModal = ref(false)
 const isFinishScreen = ref(false)
+const showNotesModal = ref(false)
+const showSetsModal = ref(false)
 
 const elapsed = ref(0)
 let timerInterval: any = null
@@ -231,7 +235,11 @@ let timerInterval: any = null
 /* --- COMPUTED --- */
 const currentExercise = computed(() => {
    if (!activeSession.value) return {}
-   return activeSession.value.exercises[activeSession.value.currentExerciseIndex] || {}
+   const exercise = activeSession.value.exercises[activeSession.value.currentExerciseIndex] || {}
+   if (!exercise.sessionNotes) {
+     exercise.sessionNotes = ''
+   }
+   return exercise
 })
 
 const isFirstExercise = computed(() => activeSession.value?.currentExerciseIndex === 0 && !isFinishScreen.value)
@@ -301,8 +309,8 @@ const logSet = (exercise: any) => {
   })
 }
 
-const removeSet = (exercise: any, index: number) => {
-  exercise.sets.splice(index, 1)
+const removeSet = (index: number) => {
+  currentExercise.value.sets.splice(index, 1)
 }
 
 const isExerciseComplete = (ex: any) => {
@@ -358,7 +366,8 @@ const confirmAddExercise = (name: string) => {
       targetWeight: 0,
       currentWeight: 0,
       currentReps: 10,
-      notes: ''
+      notes: '',
+      sessionNotes: ''
     })
     // Jump to the new exercise
     activeSession.value.currentExerciseIndex = activeSession.value.exercises.length - 1
@@ -376,7 +385,6 @@ const confirmAddExercise = (name: string) => {
   height: 100vh;
   height: 100dvh;
   background-color: black;
-  /* Add padding to container so floating elements have spacing from edges */
   padding: var(--spacing-sm);
   gap: var(--spacing-sm);
 }
@@ -386,7 +394,6 @@ const confirmAddExercise = (name: string) => {
   display: flex;
   align-items: center;
   padding: var(--spacing-sm) var(--spacing-md);
-  /* Transparent header as requested */
 }
 
 .header-left, .header-right {
@@ -424,45 +431,24 @@ const confirmAddExercise = (name: string) => {
   text-transform: uppercase;
 }
 
-.timer-display {
-    font-variant-numeric: tabular-nums;
-    font-weight: 800;
-    font-size: 1.1rem;
-    color: var(--color-primary);
-    /* Remove pill background for cleaner, airier look, or keep it? 
-       User asked for "better UI/UX... symmetrical". 
-       A centered plain text might look cleaner and more symmetrical with the "Volver" text. 
-       Let's try removing the background and making it match the text style but colored. 
-       OR keep the pill but perfect center. 
-       I'll keep the pill but make it slightly more subtle or standard. 
-       Actually, aligning it with "Volver" (text) suggests maybe just text is better? 
-       But "Volver" is a button.
-       Let's stick to perfect centering first. */
-    background-color: var(--color-surface);
-    padding: 6px 16px;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-}
-
 .session-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0; /* Important for flex scroll */
+    min-height: 0;
     padding-bottom: 120px; /* Space for footer */
 }
 
-/* EXERCISE VIEW: Flex column to manage scroll vs fixed */
 .exercise-view {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 1;
 }
 
 .exercise-header-block {
     flex-shrink: 0;
-    margin-bottom: var(--spacing-sm);
     padding: 0 var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
 }
 
 .exercise-title {
@@ -471,82 +457,41 @@ const confirmAddExercise = (name: string) => {
     line-height: 1.1;
 }
 
-.notes-section {
-    background-color: var(--color-surface-elevated);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--radius-md);
-    border-left: 3px solid var(--color-primary);
-    margin-top: var(--spacing-sm);
+.quick-actions-bar {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
 }
 
-.notes-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    margin-bottom: 4px;
-}
-
-.notes-text {
-    font-size: 0.9rem;
-    color: var(--color-text);
-    margin: 0;
-    line-height: 1.4;
-    white-space: pre-wrap;
-}
-
-/* SETS LIST: Grows and scrolls */
-.sets-container {
+.btn-action {
     flex: 1;
-    overflow-y: auto;
-    margin-bottom: var(--spacing-sm);
-    min-height: 60px; /* Ensure at least some list is visible */
-}
-
-.sets-list {
-    background-color: var(--color-surface);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-}
-
-.set-row {
     display: flex;
     align-items: center;
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-bottom: 1px solid var(--color-border);
-    min-height: 44px;
-}
-
-.set-row:last-child { border-bottom: none; }
-
-.set-idx {
-    color: var(--color-text-muted);
+    justify-content: center;
+    gap: var(--spacing-sm);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
     font-weight: 600;
-    width: 40px;
 }
 
-.set-details {
-    flex: 1;
-    font-weight: 700;
-    display: flex;
-    gap: var(--spacing-md);
+.btn-action svg {
+    color: var(--color-text-muted);
 }
 
-/* CONTROLS: Fixed height, never scrolls away */
 .controls-area {
     flex-shrink: 0;
     background-color: var(--color-surface);
     padding: var(--spacing-md);
-    border-radius: var(--radius-lg); /* Rounded card */
+    border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
 }
 
 .control-row {
-    margin-bottom: var(--spacing-md);
-    padding: 0;
+    margin-bottom: var(--spacing-sm);
 }
-
 .control-row:last-of-type {
     margin-bottom: var(--spacing-md);
 }
@@ -562,8 +507,8 @@ const confirmAddExercise = (name: string) => {
 
 .control-group {
     display: grid;
-    grid-template-columns: 56px 1fr 56px; /* Slightly smaller button to save space */
-    gap: var(--spacing-md);
+    grid-template-columns: 56px 1fr 56px;
+    gap: var(--spacing-sm);
     align-items: center;
 }
 
@@ -579,23 +524,6 @@ const confirmAddExercise = (name: string) => {
     align-items: center;
     justify-content: center;
     padding: 0;
-    cursor: pointer;
-    touch-action: manipulation;
-}
-
-.btn-control span {
-    margin-top: -4px;
-}
-
-.btn-control:active {
-    background-color: var(--color-border);
-    transform: scale(0.96);
-}
-
-.btn-control.primary {
-    background-color: var(--color-primary);
-    color: black;
-    border: none;
 }
 
 .input-control {
@@ -608,7 +536,6 @@ const confirmAddExercise = (name: string) => {
     font-weight: 800;
     color: white;
     padding: 0;
-    font-variant-numeric: tabular-nums;
 }
 
 /* Finish Screen */
@@ -617,35 +544,6 @@ const confirmAddExercise = (name: string) => {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.finish-card {
-    text-align: center;
-    width: 100%;
-}
-
-.summary-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-xl);
-}
-
-.stat-item {
-    display: flex;
-    flex-direction: column;
-}
-
-.stat-val {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--color-primary);
-}
-
-.stat-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
 }
 
 /* Footer */
@@ -666,13 +564,13 @@ const confirmAddExercise = (name: string) => {
 
 .footer-progress-track {
     position: absolute;
-    top: -4px; /* Move slightly up to sit on the border or just above content? Let's try sitting ON the top edge */
+    top: -4px;
     left: 0;
     right: 0;
     height: 4px;
     display: flex;
     gap: 2px;
-    background-color: var(--color-bg); /* Gap color */
+    background-color: var(--color-bg);
 }
 
 .progress-segment {
@@ -713,23 +611,5 @@ const confirmAddExercise = (name: string) => {
     font-weight: 700;
     color: var(--color-text-muted);
     font-size: 0.9rem;
-}
-
-/* Custom Scrollbar for Session Page */
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-surface); 
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border); 
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted); 
 }
 </style>
