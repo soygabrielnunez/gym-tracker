@@ -104,8 +104,16 @@
               </div>
            </div>
 
-           <button class="btn btn-primary btn-lg w-full" @click="logSet(currentExercise)">
-              REGISTRAR SERIE
+           <button 
+              class="btn btn-lg w-full transition-all"
+              :class="isLogSetSuccess ? 'btn-success-feedback' : 'btn-primary'"
+              @click="logSet(currentExercise)"
+           >
+              <span v-if="isLogSetSuccess" class="row-center">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                 REGISTRADA
+              </span>
+              <span v-else>REGISTRAR SERIE</span>
            </button>
         </div>
       </div>
@@ -235,6 +243,7 @@ const isFinishScreen = ref(false)
 const showNotesModal = ref(false)
 const showSetsModal = ref(false)
 const showListModal = ref(false)
+const isLogSetSuccess = ref(false)
 
 const elapsed = ref(0)
 let timerInterval: any = null
@@ -314,6 +323,12 @@ const logSet = (exercise: any) => {
     reps: exercise.currentReps,
     completedAt: new Date().toISOString()
   })
+
+  // Visual feedback
+  isLogSetSuccess.value = true
+  setTimeout(() => {
+    isLogSetSuccess.value = false
+  }, 1000)
 }
 
 const removeSet = (index: number) => {
@@ -775,5 +790,24 @@ const confirmAddExercise = (name: string) => {
     font-weight: 700;
     color: var(--color-text-muted);
     font-size: 0.9rem;
+}
+
+.btn-success-feedback {
+    background-color: var(--color-primary);
+    color: black;
+    font-weight: 800;
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(204, 255, 0, 0.4);
+}
+
+.row-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.transition-all {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>
