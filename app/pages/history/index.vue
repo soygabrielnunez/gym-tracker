@@ -11,8 +11,8 @@
       </div>
     </header>
 
-    <div class="page-header mb-6">
-      <h1 class="mb-2">Historial</h1>
+    <div class="mb-8">
+      <h1 class="page-title mb-2">Historial</h1>
       <p class="text-muted">Todos tus entrenamientos completados</p>
     </div>
 
@@ -39,11 +39,7 @@
               @click.stop="confirmDelete(session.id)"
               title="Eliminar del historial"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 6h18"/>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </div>
         </div>
@@ -120,12 +116,6 @@ const calculateDuration = (start: string, end: string) => {
 </script>
 
 <style scoped>
-.page-header h1 {
-    font-size: 2rem;
-    color: var(--color-primary);
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-}
 
 .history-card {
   padding: var(--spacing-md) var(--spacing-lg);

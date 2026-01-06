@@ -2,7 +2,7 @@
   <div>
     <!-- Hero Section -->
     <section ref="heroSection" class="hero-section mb-8">
-      <h1 class="mb-8 pl-2">Tu Gym <span class="text-white">Tracker</span></h1>
+      <h1 class="page-title mb-8 pl-2">Tu Gym <span class="text-white">Tracker</span></h1>
       
       <div class="card">
         <button v-if="activeSession" class="btn btn-primary btn-hero mb-4" @click="resumeWorkout">
@@ -70,7 +70,7 @@
                 <h2 class="h3">Historial Reciente</h2>
                 <span class="exercise-badge" v-if="history.length > 0">{{ history.length }}</span>
             </div>
-            <div class="text-primary text-sm font-bold uppercase">Ver todo</div>
+            <div class="text-primary text-sm font-bold uppercase" style="border: 1px solid var(--color-border); padding: 4px 12px; border-radius: 99px;">Ver todo</div>
         </NuxtLink>
       </div>
       
@@ -227,7 +227,8 @@ const startWorkout = (workoutId: string) => {
 }
 
 const handleOverwriteConfirm = () => {
-  const workoutId = nextWorkoutId.value ?? undefined
+  if (!nextWorkoutId.value) return 
+  const workoutId = nextWorkoutId.value
   const sessionId = startSession(workoutId)
   router.push(`/session/${sessionId}`)
   showOverwriteModal.value = false

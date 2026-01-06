@@ -10,7 +10,7 @@
       </NuxtLink>
     </header>
 
-    <h1 class="mb-6">Nueva Rutina</h1>
+    <h1 class="page-title mb-8">Nueva Rutina</h1>
     
     <!-- Routine Name -->
     <div class="card mb-6">

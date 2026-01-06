@@ -105,10 +105,13 @@ h4 {
   line-height: 1.2;
 }
 
-h1 {
-  font-size: 1.75rem;
+h1,
+.page-title {
+  font-size: 2rem;
   color: var(--color-primary);
   text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+  line-height: 1.1;
 }
 
 h2,
