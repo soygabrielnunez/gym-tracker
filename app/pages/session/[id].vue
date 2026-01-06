@@ -111,30 +111,38 @@
       </div>
 
       <!-- FINISH SCREEN -->
+      <!-- FINISH SCREEN -->
       <div v-else class="finish-view">
-         <div class="finish-card">
-            <h2>¡Sesión Completada!</h2>
-            <div class="summary-stats mb-6">
-               <div class="stat-item">
-                  <span class="stat-val">{{ activeSession.exercises.length }}</span>
-                  <span class="stat-label">Ejercicios</span>
-               </div>
-               <div class="stat-item">
-                  <span class="stat-val">{{ totalSetsComputed }}</span>
-                  <span class="stat-label">Series</span>
-               </div>
-               <div class="stat-item">
-                  <span class="stat-val">{{ formatTime(elapsed) }}</span>
-                  <span class="stat-label">Tiempo</span>
-               </div>
-            </div>
-            
-            <button class="btn btn-primary btn-lg w-full mb-4" @click="confirmFinish">
-               GUARDAR ENTRENAMIENTO
-            </button>
-            <button class="btn btn-secondary w-full" @click="isFinishScreen = false">
-               VOLVER
-            </button>
+         <div class="finish-content">
+             <div class="trophy-container">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="trophy-icon"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                <div class="shine"></div>
+             </div>
+             
+             <h2 class="finish-title">¡ENTRENAMIENTO<br>COMPLETADO!</h2>
+             <p class="finish-subtitle">Gran trabajo hoy</p>
+
+             <div class="summary-grid">
+                <div class="p-card">
+                   <span class="p-val">{{ activeSession.exercises.length }}</span>
+                   <span class="p-label">Ejercicios</span>
+                </div>
+                <div class="p-card">
+                   <span class="p-val">{{ totalSetsComputed }}</span>
+                   <span class="p-label">Series</span>
+                </div>
+                <div class="p-card">
+                   <span class="p-val">{{ formatTime(elapsed) }}</span>
+                   <span class="p-label">Tiempo</span>
+                </div>
+             </div>
+             
+             <button class="btn-save" @click="confirmFinish">
+                GUARDAR Y SALIR
+             </button>
+             <button class="btn-resume" @click="isFinishScreen = false">
+                VOLVER AL ENTRENO
+             </button>
          </div>
       </div>
 
@@ -581,13 +589,145 @@ const confirmAddExercise = (name: string) => {
 
 /* Finish Screen */
 .finish-view {
-    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+    z-index: 50; /* Above everything */
     display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+    animation: fadeIn 0.4s ease-out;
+}
+
+.finish-content {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.trophy-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--color-primary-rgb), 0.2) 0%, transparent 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-lg);
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.trophy-icon {
+    color: var(--color-primary);
+    width: 64px;
+    height: 64px;
+    filter: drop-shadow(0 0 10px rgba(var(--color-primary-rgb), 0.5));
+}
+
+.finish-title {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0;
+    margin-bottom: var(--spacing-xs);
+    background: linear-gradient(to right, #fff, #ccc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+}
+
+.finish-subtitle {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    margin-bottom: var(--spacing-xl);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-sm);
+    width: 100%;
+    margin-bottom: var(--spacing-xl);
+}
+
+.p-card {
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md) var(--spacing-xs);
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
-/* Footer */
+.p-val {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.p-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-save {
+    width: 100%;
+    background-color: var(--color-primary);
+    color: black;
+    border: none;
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    font-weight: 800;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-md);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-save:active {
+    transform: scale(0.98);
+}
+
+.btn-resume {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px;
+    text-decoration: underline;
+    text-decoration-color: var(--color-border);
+    text-underline-offset: 4px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
 .session-footer {
     position: fixed;
     bottom: 0;
