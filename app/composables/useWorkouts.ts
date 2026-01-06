@@ -73,7 +73,7 @@ export const useWorkouts = () => {
     }
 
     const startSession = (workoutId?: string) => {
-        let sessionBase = {
+        let sessionBase: any = {
             id: crypto.randomUUID(),
             startTime: new Date().toISOString(),
             currentExerciseIndex: 0,
@@ -92,6 +92,17 @@ export const useWorkouts = () => {
                     sessionNotes: '' // Initialize sessionNotes
                 }))
             }
+        } else {
+            // For "Train Now", start with a default exercise to prevent crash
+            sessionBase.exercises.push({
+                name: 'Ejercicio 1',
+                sets: [],
+                targetSets: 3,
+                targetReps: 10,
+                targetWeight: 0,
+                notes: '',
+                sessionNotes: ''
+            })
         }
 
         activeSession.value = sessionBase
@@ -150,7 +161,7 @@ export const useWorkouts = () => {
         const url = `${window.location.origin}/import/${encodedData}`
 
         navigator.clipboard.writeText(url).then(() => {
-            alert('¡Enlace para compartir copiado al portapapeles!')
+            alert('¡Enlace para compartir copiado al portapeles!')
         }).catch(err => {
             console.error('Error al copiar el enlace: ', err)
             alert('No se pudo copiar el enlace. Inténtalo de nuevo.')
