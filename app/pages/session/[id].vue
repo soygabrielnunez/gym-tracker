@@ -363,8 +363,6 @@ const confirmAddExercise = (name: string) => {
       targetReps: 10,
       targetWeight: 0,
       currentWeight: 0,
-      targetWeight: 0,
-      currentWeight: 0,
       currentReps: 10,
       notes: '',
       sessionNotes: ''
@@ -387,6 +385,12 @@ const confirmAddExercise = (name: string) => {
   background-color: black;
   padding: var(--spacing-sm);
   gap: var(--spacing-sm);
+  overflow: hidden;
+  overscroll-behavior: none;
+  position: fixed; /* Ensures it stays fixed to viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
 }
 
 .session-header {
@@ -437,6 +441,8 @@ const confirmAddExercise = (name: string) => {
     flex-direction: column;
     min-height: 0;
     padding-bottom: 120px; /* Space for footer */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .exercise-view {
