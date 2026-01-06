@@ -622,8 +622,6 @@ textarea {
   align-items: flex-end;
   /* Bottom sheet by default */
   z-index: 1000;
-  padding: var(--spacing-md);
-  padding-bottom: calc(var(--spacing-md) + var(--safe-area-bottom));
 }
 
 .sheet-content {
