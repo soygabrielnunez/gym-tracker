@@ -798,6 +798,9 @@ const confirmAddExercise = (name: string) => {
   position: relative;
   z-index: 1;
 }
+.btn-log-set.is-animating {
+  animation: flash 0.5s ease-out;
+}
 .btn-log-set.is-animating::after {
   content: '';
   position: absolute;
@@ -809,6 +812,18 @@ const confirmAddExercise = (name: string) => {
   border-radius: 50%;
   transform: translate(-50%, -50%);
   animation: ripple 0.5s ease-out;
+}
+
+@keyframes flash {
+  0% {
+    background-color: var(--color-primary);
+  }
+  50% {
+    background-color: #a1ff00; /* A brighter shade of the primary color */
+  }
+  100% {
+    background-color: var(--color-primary);
+  }
 }
 
 @keyframes ripple {
