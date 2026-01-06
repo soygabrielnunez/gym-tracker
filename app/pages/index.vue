@@ -10,12 +10,6 @@
           Resumir Entreno
         </button>
 
-        <button class="btn btn-primary btn-hero mb-4" @click="startEmptyWorkout">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-          Entrenar Ahora
-        </button>
         <NuxtLink to="/workouts/create" class="btn btn-secondary">
           Crear Nueva Rutina
         </NuxtLink>
@@ -132,12 +126,6 @@
     @cancel="showOverwriteModal = false"
   />
 
-  <!-- Mobile Floating Action Button -->
-  <Fab :show="showFab" @click="handleFabClick">
-    <svg v-if="activeSession" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-    <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-  </Fab>
-
   <!-- Start Workout Bottom Sheet -->
   <BottomSheet
     :show="showStartWorkoutSheet"
@@ -146,13 +134,6 @@
     <div class="sheet-content">
       <h3 class="mb-4 text-center">Iniciar Entrenamiento</h3>
       
-      <button class="btn btn-primary w-full mb-6" @click="startSheetEmptyWorkout">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-            <path d="M12 5v14M5 12h14"/>
-        </svg>
-        Entrenar Libre
-      </button>
-
       <div v-if="workouts.length > 0">
         <div class="divider mb-4">
             <span class="divider-text">O mis rutinas</span>
@@ -216,39 +197,7 @@ const { workouts, activeSession, startSession, shareWorkout, history, deleteSess
 const router = useRouter()
 
 // --- FAB Logic ---
-const showFab = ref(false)
 const showStartWorkoutSheet = ref(false)
-const heroSection = ref<HTMLElement | null>(null)
-
-const handleScroll = () => {
-    if (!heroSection.value) return
-    const rect = heroSection.value.getBoundingClientRect()
-    // Show FAB when hero bottom passes the top of the screen (or is close)
-    showFab.value = rect.bottom < 100 
-}
-
-onMounted(() => {
-    window.addEventListener('scroll', handleScroll)
-    // Check initial state
-    handleScroll()
-})
-
-onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll)
-})
-
-const handleFabClick = () => {
-    if (activeSession.value) {
-        resumeWorkout()
-    } else {
-        showStartWorkoutSheet.value = true
-    }
-}
-
-const startSheetEmptyWorkout = () => {
-    showStartWorkoutSheet.value = false
-    startEmptyWorkout()
-}
 
 const startSheetWorkout = (workoutId: string) => {
     showStartWorkoutSheet.value = false
@@ -266,22 +215,9 @@ const resumeWorkout = () => {
 // Overwrite confirmation logic
 const showOverwriteModal = ref(false)
 const nextWorkoutId = ref<string | null>(null)
-const isStartingEmpty = ref(false)
-
-const startEmptyWorkout = () => {
-  if (activeSession.value) {
-    isStartingEmpty.value = true
-    nextWorkoutId.value = null
-    showOverwriteModal.value = true
-  } else {
-    const sessionId = startSession()
-    router.push(`/session/${sessionId}`)
-  }
-}
 
 const startWorkout = (workoutId: string) => {
   if (activeSession.value) {
-    isStartingEmpty.value = false
     nextWorkoutId.value = workoutId
     showOverwriteModal.value = true
   } else {
@@ -291,7 +227,7 @@ const startWorkout = (workoutId: string) => {
 }
 
 const handleOverwriteConfirm = () => {
-  const workoutId = isStartingEmpty.value ? undefined : nextWorkoutId.value ?? undefined
+  const workoutId = nextWorkoutId.value ?? undefined
   const sessionId = startSession(workoutId)
   router.push(`/session/${sessionId}`)
   showOverwriteModal.value = false

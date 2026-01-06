@@ -72,37 +72,24 @@ export const useWorkouts = () => {
         }
     }
 
-    const startSession = (workoutId?: string) => {
+    const startSession = (workoutId: string) => {
         let sessionBase: any = {
             id: crypto.randomUUID(),
             startTime: new Date().toISOString(),
             currentExerciseIndex: 0,
             exercises: [],
-            name: 'Entrenamiento Libre'
+            name: 'Entrenamiento'
         }
 
-        if (workoutId) {
-            const workout = workouts.value.find(w => w.id === workoutId)
-            if (workout) {
-                sessionBase.name = workout.name
-                // Clone exercises structure
-                sessionBase.exercises = workout.exercises.map((e: any) => ({
-                    ...e,
-                    sets: [], // Empty sets for the session
-                    sessionNotes: '' // Initialize sessionNotes
-                }))
-            }
-        } else {
-            // For "Train Now", start with a default exercise to prevent crash
-            sessionBase.exercises.push({
-                name: 'Ejercicio 1',
-                sets: [],
-                targetSets: 3,
-                targetReps: 10,
-                targetWeight: 0,
-                notes: '',
-                sessionNotes: ''
-            })
+        const workout = workouts.value.find(w => w.id === workoutId)
+        if (workout) {
+            sessionBase.name = workout.name
+            // Clone exercises structure
+            sessionBase.exercises = workout.exercises.map((e: any) => ({
+                ...e,
+                sets: [], // Empty sets for the session
+                sessionNotes: '' // Initialize sessionNotes
+            }))
         }
 
         activeSession.value = sessionBase
