@@ -104,8 +104,11 @@
               </div>
            </div>
 
-           <button class="btn btn-primary btn-lg w-full" @click="logSet(currentExercise)">
-              REGISTRAR SERIE
+           <button
+              class="btn btn-primary btn-lg w-full btn-log-set"
+              :class="{ 'is-animating': isAnimating }"
+              @click="logSet(currentExercise)">
+              <span class="btn-text">REGISTRAR SERIE</span>
            </button>
         </div>
       </div>
@@ -235,6 +238,7 @@ const isFinishScreen = ref(false)
 const showNotesModal = ref(false)
 const showSetsModal = ref(false)
 const showListModal = ref(false)
+const isAnimating = ref(false)
 
 const elapsed = ref(0)
 let timerInterval: any = null
@@ -314,6 +318,13 @@ const logSet = (exercise: any) => {
     reps: exercise.currentReps,
     completedAt: new Date().toISOString()
   })
+
+  // -- Animate button
+  isAnimating.value = false // Reset animation state
+  setTimeout(() => {
+    isAnimating.value = true
+    setTimeout(() => isAnimating.value = false, 500) // Match animation duration
+  }, 50)
 }
 
 const removeSet = (index: number) => {
@@ -775,5 +786,41 @@ const confirmAddExercise = (name: string) => {
     font-weight: 700;
     color: var(--color-text-muted);
     font-size: 0.9rem;
+}
+
+/* Animation for Log Set button */
+.btn-log-set {
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.3s, transform 0.2s;
+}
+.btn-log-set .btn-text {
+  position: relative;
+  z-index: 1;
+}
+.btn-log-set.is-animating::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: ripple 0.5s ease-out;
+}
+
+@keyframes ripple {
+  from {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  to {
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+  }
 }
 </style>
