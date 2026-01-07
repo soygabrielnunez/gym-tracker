@@ -201,14 +201,22 @@
     />
     <ConfirmModal
       :show="showFinishModal"
-      title="¿Descartar entrenamiento?"
-      message="Se perderá todo el progreso de esta sesión. Esta acción no se puede deshacer."
-      confirmText="DESCARTAR"
-      cancelText="CANCELAR"
-      confirmType="danger"
-      @confirm="confirmCancel"
+      title="¿Finalizar sesión?"
+      message="¿Qué deseas hacer con la sesión actual?"
       @cancel="showFinishModal = false"
-    />
+    >
+      <template #actions>
+        <button class="btn btn-secondary" @click="showFinishModal = false">
+           CANCELAR
+        </button>
+        <button class="btn btn-danger" @click="confirmCancel">
+           DESCARTAR
+        </button>
+        <button class="btn btn-primary" @click="confirmFinish">
+           TERMINAR
+        </button>
+      </template>
+    </ConfirmModal>
     
     <InputModal
       :show="showExerciseModal"
@@ -796,7 +804,8 @@ const confirmAddExercise = (name: string) => {
     background-color: var(--color-primary);
     color: black;
     font-weight: 800;
-    transform: scale(1.02);
+    transform: scale(1.04);
+    z-index: 10;
     box-shadow: 0 0 20px rgba(204, 255, 0, 0.4);
 }
 

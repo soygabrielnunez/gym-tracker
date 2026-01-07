@@ -8,14 +8,16 @@
           </div>
           <p class="text-center text-muted mb-4">{{ message }}</p>
           <div class="sheet-actions">
-            <button class="btn btn-secondary" @click="$emit('cancel')">{{ cancelText || 'Cancelar' }}</button>
-            <button 
-              class="btn" 
-              :class="confirmType === 'danger' ? 'btn-danger' : 'btn-primary'"
-              @click="$emit('confirm')"
-            >
-              {{ confirmText || 'Confirmar' }}
-            </button>
+            <slot name="actions">
+              <button class="btn btn-secondary" @click="$emit('cancel')">{{ cancelText || 'Cancelar' }}</button>
+              <button 
+                class="btn" 
+                :class="confirmType === 'danger' ? 'btn-danger' : 'btn-primary'"
+                @click="$emit('confirm')"
+              >
+                {{ confirmText || 'Confirmar' }}
+              </button>
+            </slot>
           </div>
         </div>
       </div>
