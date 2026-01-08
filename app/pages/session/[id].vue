@@ -106,12 +106,19 @@
 
            <button 
               class="btn btn-lg w-full transition-all"
-              :class="isLogSetSuccess ? 'btn-success-feedback' : 'btn-primary'"
-              @click="logSet(currentExercise)"
+              :class="{
+                'btn-success-feedback': isLogSetSuccess,
+                'btn-completed': isCurrentExerciseComplete && !isLogSetSuccess,
+                'btn-primary': !isCurrentExerciseComplete && !isLogSetSuccess,
+              }"
+              @click="handlePrimaryAction"
            >
               <span v-if="isLogSetSuccess" class="row-center">
                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                  REGISTRADA
+              </span>
+              <span v-else-if="isCurrentExerciseComplete" class="row-center">
+                EJERCICIO COMPLETO
               </span>
               <span v-else>REGISTRAR SERIE</span>
            </button>
@@ -268,6 +275,10 @@ const currentExercise = computed(() => {
 
 const isFirstExercise = computed(() => activeSession.value?.currentExerciseIndex === 0 && !isFinishScreen.value)
 const isLastExercise = computed(() => activeSession.value?.currentExerciseIndex === activeSession.value.exercises.length - 1)
+const isCurrentExerciseComplete = computed(() => {
+  if (!currentExercise.value) return false
+  return isExerciseComplete(currentExercise.value)
+})
 const totalSetsComputed = computed(() => {
    if (!activeSession.value) return 0
    return activeSession.value.exercises.reduce((acc: number, ex: any) => acc + ex.sets.length, 0)
@@ -337,6 +348,14 @@ const logSet = (exercise: any) => {
   setTimeout(() => {
     isLogSetSuccess.value = false
   }, 1000)
+}
+
+const handlePrimaryAction = () => {
+  if (isCurrentExerciseComplete.value) {
+    nextExercise()
+  } else {
+    logSet(currentExercise.value)
+  }
 }
 
 const removeSet = (index: number) => {
@@ -818,5 +837,12 @@ const confirmAddExercise = (name: string) => {
 
 .transition-all {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-completed {
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 800;
 }
 </style>
