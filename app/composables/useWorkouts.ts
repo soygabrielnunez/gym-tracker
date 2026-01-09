@@ -96,6 +96,30 @@ export const useWorkouts = () => {
         return sessionBase.id
     }
 
+    const startFreeSession = () => {
+        const sessionBase = {
+            id: crypto.randomUUID(),
+            startTime: new Date().toISOString(),
+            currentExerciseIndex: 0,
+            exercises: [
+              {
+                name: 'Test Exercise',
+                sets: [],
+                targetSets: 3,
+                targetReps: 10,
+                targetWeight: 0,
+                currentWeight: 0,
+                currentReps: 10,
+                notes: '',
+                sessionNotes: ''
+              }
+            ],
+            name: 'Entreno Libre'
+        }
+        activeSession.value = sessionBase
+        return sessionBase.id
+    }
+
     const finishSession = () => {
         if (!activeSession.value) return
 
@@ -185,6 +209,7 @@ export const useWorkouts = () => {
         createWorkout,
         updateWorkout,
         startSession,
+        startFreeSession,
         finishSession,
         cancelSession,
         deleteSession,

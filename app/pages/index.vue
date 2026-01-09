@@ -10,6 +10,11 @@
           Resumir Entreno
         </button>
 
+        <button v-else class="btn btn-primary btn-hero mb-4" @click="handleStartFreeSession" data-testid="train-now-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+          ENTRENAR AHORA
+        </button>
+
         <NuxtLink to="/workouts/create" class="btn btn-secondary">
           Crear Nueva Rutina
         </NuxtLink>
@@ -195,7 +200,7 @@ dayjs.extend(isToday)
 dayjs.extend(isYesterday)
 dayjs.extend(relativeTime)
 
-const { workouts, activeSession, startSession, shareWorkout, history, deleteSession, deleteWorkout } = useWorkouts()
+const { workouts, activeSession, startSession, startFreeSession, shareWorkout, history, deleteSession, deleteWorkout } = useWorkouts()
 const router = useRouter()
 
 // --- FAB Logic ---
@@ -229,11 +234,25 @@ const startWorkout = (workoutId: string) => {
 }
 
 const handleOverwriteConfirm = () => {
-  if (!nextWorkoutId.value) return 
-  const workoutId = nextWorkoutId.value
-  const sessionId = startSession(workoutId)
-  router.push(`/session/${sessionId}`)
+  if (nextWorkoutId.value === 'free-session') {
+    handleStartFreeSession(true)
+  } else if (nextWorkoutId.value) {
+    const workoutId = nextWorkoutId.value
+    const sessionId = startSession(workoutId)
+    router.push(`/session/${sessionId}`)
+  }
   showOverwriteModal.value = false
+  nextWorkoutId.value = null
+}
+
+const handleStartFreeSession = (force = false) => {
+  if (activeSession.value && !force) {
+    nextWorkoutId.value = 'free-session'
+    showOverwriteModal.value = true
+  } else {
+    const sessionId = startFreeSession()
+    router.push(`/session/${sessionId}`)
+  }
 }
 
 const editWorkout = (workoutId: string) => {

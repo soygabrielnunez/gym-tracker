@@ -24,9 +24,9 @@
     <div class="session-content">
       
       <!-- EXERCISE VIEW -->
-      <div v-if="!isFinishScreen" class="exercise-view">
+      <div v-if="!isFinishScreen && activeSession.exercises.length > 0" class="exercise-view">
         <div class="exercise-header-block">
-           <div class="pagination-dots mb-2">
+           <div v-if="!isFreeWorkout" class="pagination-dots mb-2">
              <span 
                 v-for="(ex, idx) in activeSession.exercises" 
                 :key="idx"
@@ -37,12 +37,12 @@
            </div>
            
            <h1 class="exercise-title">{{ currentExercise.name }}</h1>
-           <div class="target-summary text-muted">
+           <div v-if="!isFreeWorkout" class="target-summary text-muted">
               Objetivo: {{ currentExercise.targetSets || 3 }} series × {{ currentExercise.targetReps || 10 }} reps
            </div>
 
             <!-- Sets Progress Bar -->
-            <div class="sets-progress-bar mt-2">
+            <div v-if="!isFreeWorkout" class="sets-progress-bar mt-2">
                <div 
                   class="sets-progress-fill" 
                   :style="{ width: Math.min((currentExercise.sets.length / (currentExercise.targetSets || 3)) * 100, 100) + '%' }"
@@ -118,7 +118,16 @@
         </div>
       </div>
 
-      <!-- FINISH SCREEN -->
+      <!-- EMPTY STATE -->
+      <div v-if="!isFinishScreen && activeSession.exercises.length === 0" class="empty-state-view">
+        <div class="empty-content">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon"><path d="M12 2a2 2 0 0 1 2 2v2h-4V4a2 2 0 0 1 2-2z"/><path d="M6 6a6 6 0 0 1 12 0v2H6V8z"/><path d="M8 10a2 2 0 0 0-2 2v4a2 2 0 1 0 4 0v-4a2 2 0 0 0-2-2z"/><path d="M16 10a2 2 0 0 0-2 2v4a2 2 0 1 0 4 0v-4a2 2 0 0 0-2-2z"/></svg>
+          <h2 class="empty-title">Sin Ejercicios</h2>
+          <p class="empty-subtitle">Añade tu primer ejercicio para empezar a registrar.</p>
+        </div>
+      </div>
+
+
       <!-- FINISH SCREEN -->
       <div v-else class="finish-view">
          <div class="finish-content">
@@ -170,17 +179,23 @@
         </button>
 
        <div class="nav-indicator">
-         <button class="btn-list" @click="showListModal = true">
+         <button v-if="activeSession.exercises.length > 0" class="btn-list" @click="showListModal = true">
            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
            <span>LISTA</span>
          </button>
+        <button v-else class="btn-primary btn-add-exercise" @click="showExerciseModal = true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          AÑADIR EJERCICIO
+        </button>
        </div>
 
        <button 
-          class="btn-nav"           @click="nextExercise"
+          class="btn-nav"
+          @click="nextExercise"
         >
            <svg v-if="!isFinishScreen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-           <span v-if="isLastExercise && !isFinishScreen">TERMINAR</span>
+           <span v-if="isFreeWorkout && isLastExercise && !isFinishScreen">AÑADIR</span>
+           <span v-else-if="isLastExercise && !isFinishScreen">TERMINAR</span>
            <span v-else-if="isFinishScreen"></span>
            <span v-else>SIGUIENTE</span>
         </button>
@@ -267,7 +282,11 @@ const currentExercise = computed(() => {
 })
 
 const isFirstExercise = computed(() => activeSession.value?.currentExerciseIndex === 0 && !isFinishScreen.value)
-const isLastExercise = computed(() => activeSession.value?.currentExerciseIndex === activeSession.value.exercises.length - 1)
+const isLastExercise = computed(() => {
+    if (!activeSession.value || activeSession.value.exercises.length === 0) return true
+    return activeSession.value.currentExerciseIndex >= activeSession.value.exercises.length - 1
+})
+const isFreeWorkout = computed(() => activeSession.value?.name === 'Entreno Libre')
 const totalSetsComputed = computed(() => {
    if (!activeSession.value) return 0
    return activeSession.value.exercises.reduce((acc: number, ex: any) => acc + ex.sets.length, 0)
@@ -344,17 +363,24 @@ const removeSet = (index: number) => {
 }
 
 const isExerciseComplete = (ex: any) => {
+    if (isFreeWorkout.value) return ex.sets && ex.sets.length > 0
     return ex.sets && ex.sets.length >= (ex.targetSets || 3)
 }
 
 /* --- NAVIGATION --- */
 const nextExercise = () => {
-    if (isFinishScreen.value) return
+    if (isFinishScreen.value) return;
+
+    // For free workouts, if there are no more exercises, show modal to add a new one
+    if (isFreeWorkout.value && activeSession.value.currentExerciseIndex >= activeSession.value.exercises.length - 1) {
+        showExerciseModal.value = true
+        return
+    }
 
     if (isLastExercise.value) {
-        isFinishScreen.value = true
-    } else {
-        activeSession.value.currentExerciseIndex++
+        isFinishScreen.value = true;
+    } else if (activeSession.value.currentExerciseIndex < activeSession.value.exercises.length - 1) {
+        activeSession.value.currentExerciseIndex++;
     }
 }
 
@@ -818,5 +844,52 @@ const confirmAddExercise = (name: string) => {
 
 .transition-all {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-add-exercise {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.empty-state-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  color: var(--color-text-muted);
+}
+
+.empty-icon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.empty-subtitle {
+  font-size: 1rem;
+  max-width: 280px;
+  margin: 0;
 }
 </style>
