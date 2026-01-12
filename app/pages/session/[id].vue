@@ -40,9 +40,9 @@
            <div class="target-summary text-muted">
               Objetivo: {{ currentExercise.targetSets || 3 }} series × {{ currentExercise.targetReps || 10 }} reps
            </div>
-            <div v-if="currentExercise.restTime && (currentExercise.restTime.minutes > 0 || currentExercise.restTime.seconds > 0)" class="target-summary text-muted">
-                Descanso: {{ formatRestTime(currentExercise.restTime) }}
-            </div>
+           <div v-if="currentExercise.restTime && currentExercise.restTime.value > 0" class="rest-summary text-muted">
+              Descanso: {{ formatRestTime(currentExercise.restTime) }}
+           </div>
 
             <!-- Sets Progress Bar -->
             <div class="sets-progress-bar mt-2">
@@ -316,13 +316,9 @@ const formatTime = (seconds: number) => {
   return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`
 }
 
-const formatRestTime = (restTime: { minutes: number, seconds: number }) => {
-  if (!restTime) return ''
-  const { minutes, seconds } = restTime
-  let result = ''
-  if (minutes > 0) result += `${minutes}m `
-  if (seconds > 0) result += `${seconds}s`
-  return result.trim()
+const formatRestTime = (restTime: { value: number; unit: string }) => {
+  if (!restTime || !restTime.value) return ''
+  return `${restTime.value} ${restTime.unit}`
 }
 
 const adjustReps = (delta: number) => {

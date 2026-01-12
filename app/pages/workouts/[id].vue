@@ -91,6 +91,25 @@
           </div>
 
           <!-- Notes (Optional) -->
+          <!-- Rest Time (Optional) -->
+          <div class="exercise-rest">
+              <label class="label-sm">Descanso (Opcional)</label>
+              <div class="rest-inputs">
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  v-model.number="exercise.restTime.value"
+                  class="input target-input"
+                  min="0"
+                />
+                <select v-model="exercise.restTime.unit" class="input rest-unit-select">
+                  <option value="seconds">Segundos</option>
+                  <option value="minutes">Minutos</option>
+                </select>
+              </div>
+          </div>
+
+          <!-- Notes (Optional) -->
           <div class="exercise-notes">
             <textarea
               v-model="exercise.notes"
@@ -101,31 +120,6 @@
               @blur="collapseNotes($event)"
             ></textarea>
           </div>
-
-            <!-- Rest Time (Optional) -->
-            <div class="exercise-rest">
-                <label class="label-sm">Descanso</label>
-                <div class="rest-inputs">
-                <input
-                    type="number"
-                    inputmode="numeric"
-                    v-model.number="exercise.restTime.minutes"
-                    class="input target-input"
-                    min="0"
-                    placeholder="m"
-                />
-                <input
-                    type="number"
-                    inputmode="numeric"
-                    v-model.number="exercise.restTime.seconds"
-                    class="input target-input"
-                    min="0"
-                    max="59"
-                    step="5"
-                    placeholder="s"
-                />
-                </div>
-            </div>
         </div>
       </div>
 
@@ -161,15 +155,13 @@ const exercises = ref<any[]>([])
 onMounted(() => {
   if (workout) {
     name.value = workout.name
-    // Deep copy exercises to avoid reactivity issues with the original state
-    exercises.value = JSON.parse(JSON.stringify(workout.exercises))
-
-    // Backward compatibility: add restTime if it doesn't exist
-    exercises.value.forEach(ex => {
-        if (!ex.restTime) {
-            ex.restTime = { minutes: 0, seconds: 0 }
-        }
-    })
+    // Deep copy and ensure backward compatibility for restTime
+    exercises.value = JSON.parse(JSON.stringify(workout.exercises)).map((ex: any) => {
+      if (!ex.restTime) {
+        ex.restTime = { value: null, unit: 'seconds' };
+      }
+      return ex;
+    });
   } else {
     // Optional: handle case where workout is not found
     router.replace('/')
@@ -184,10 +176,7 @@ const addExercise = () => {
     targetReps: 10,
     targetWeight: 0,
     notes: '',
-    restTime: {
-        minutes: 0,
-        seconds: 0
-    }
+    restTime: { value: null, unit: 'seconds' }
   })
 }
 
@@ -291,6 +280,29 @@ const saveWorkout = () => {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.exercise-rest {
+  /* No margin-bottom here, notes will handle it */
+}
+
+.rest-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.rest-unit-select {
+  text-align: left;
+  padding: 0 var(--spacing-md);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-md) center;
+  background-size: 1em;
 }
 
 .target-field {
@@ -334,16 +346,5 @@ const saveWorkout = () => {
 .notes-input::placeholder {
   color: var(--color-text-muted);
   font-style: italic;
-}
-
-.exercise-rest {
-  margin-top: var(--spacing-md);
-}
-
-.rest-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-sm);
-  max-width: 50%;
 }
 </style>

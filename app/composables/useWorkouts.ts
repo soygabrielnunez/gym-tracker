@@ -9,7 +9,11 @@ export const useWorkouts = () => {
     onMounted(() => {
         // Workouts
         const savedWorkouts = localStorage.getItem('gym-workouts')
-        if (savedWorkouts) workouts.value = JSON.parse(savedWorkouts)
+        if (savedWorkouts) {
+            const parsedWorkouts = JSON.parse(savedWorkouts);
+            // SANITIZE: Filter out any null or invalid workout entries
+            workouts.value = parsedWorkouts.filter((w: any) => w && w.id && w.name);
+        }
 
         // History
         const savedHistory = localStorage.getItem('gym-history')

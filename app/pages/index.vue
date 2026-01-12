@@ -21,27 +21,27 @@
       <div class="section-header">
         <h2 class="h3">Mis Rutinas</h2>
         <div class="header-actions">
-          <span class="exercise-badge" v-if="workouts.length > 0">{{ workouts.length }}</span>
+          <span class="exercise-badge" v-if="filteredWorkouts.length > 0">{{ filteredWorkouts.length }}</span>
         </div>
       </div>
       
-      <div v-if="workouts.length === 0" class="empty-state">
+      <div v-if="filteredWorkouts.length === 0" class="empty-state">
         <p>No hay rutinas guardadas.</p>
         <p class="text-muted" style="font-size: 0.875rem; margin: 0">Crea una rutina o importa un archivo</p>
       </div>
       
       <div v-else class="row-stack">
         <div 
-          v-for="workout in workouts" 
-          :key="workout.id" 
+          v-for="workout in filteredWorkouts"
+          :key="workout?.id"
           class="card card-interactive workout-card"
-          @click="startWorkout(workout.id)"
+          @click="workout && startWorkout(workout.id)"
         >
-          <div class="row-between">
+          <div v-if="workout" class="row-between">
             <div class="workout-info">
               <h3 class="workout-name">{{ workout.name }}</h3>
               <p class="workout-meta text-muted">
-                {{ workout.exercises.length }} ejercicios • {{ getTotalSets(workout) }} series
+                {{ workout.exercises?.length || 0 }} ejercicios • {{ getTotalSets(workout) }} series
               </p>
             </div>
             <div class="workout-actions">
@@ -136,14 +136,14 @@
     <div class="sheet-content">
       <h3 class="mb-4 text-center">Iniciar Entrenamiento</h3>
       
-      <div v-if="workouts.length > 0">
+      <div v-if="filteredWorkouts.length > 0">
         <div class="divider mb-4">
             <span class="divider-text">O mis rutinas</span>
         </div>
         
         <div class="row-stack">
             <div 
-              v-for="workout in workouts" 
+              v-for="workout in filteredWorkouts"
               :key="workout.id" 
               class="card card-interactive p-3"
               @click="startSheetWorkout(workout.id)"
@@ -197,6 +197,10 @@ dayjs.extend(relativeTime)
 
 const { workouts, activeSession, startSession, shareWorkout, history, deleteSession, deleteWorkout } = useWorkouts()
 const router = useRouter()
+
+const filteredWorkouts = computed(() => {
+  return workouts.value.filter(w => w && w.id && w.name)
+})
 
 // --- FAB Logic ---
 const showStartWorkoutSheet = ref(false)
