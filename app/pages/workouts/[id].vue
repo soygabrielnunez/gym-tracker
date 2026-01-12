@@ -101,6 +101,31 @@
               @blur="collapseNotes($event)"
             ></textarea>
           </div>
+
+            <!-- Rest Time (Optional) -->
+            <div class="exercise-rest">
+                <label class="label-sm">Descanso</label>
+                <div class="rest-inputs">
+                <input
+                    type="number"
+                    inputmode="numeric"
+                    v-model.number="exercise.restTime.minutes"
+                    class="input target-input"
+                    min="0"
+                    placeholder="m"
+                />
+                <input
+                    type="number"
+                    inputmode="numeric"
+                    v-model.number="exercise.restTime.seconds"
+                    class="input target-input"
+                    min="0"
+                    max="59"
+                    step="5"
+                    placeholder="s"
+                />
+                </div>
+            </div>
         </div>
       </div>
 
@@ -138,6 +163,13 @@ onMounted(() => {
     name.value = workout.name
     // Deep copy exercises to avoid reactivity issues with the original state
     exercises.value = JSON.parse(JSON.stringify(workout.exercises))
+
+    // Backward compatibility: add restTime if it doesn't exist
+    exercises.value.forEach(ex => {
+        if (!ex.restTime) {
+            ex.restTime = { minutes: 0, seconds: 0 }
+        }
+    })
   } else {
     // Optional: handle case where workout is not found
     router.replace('/')
@@ -151,7 +183,11 @@ const addExercise = () => {
     targetSets: 3,
     targetReps: 10,
     targetWeight: 0,
-    notes: ''
+    notes: '',
+    restTime: {
+        minutes: 0,
+        seconds: 0
+    }
   })
 }
 
@@ -298,5 +334,16 @@ const saveWorkout = () => {
 .notes-input::placeholder {
   color: var(--color-text-muted);
   font-style: italic;
+}
+
+.exercise-rest {
+  margin-top: var(--spacing-md);
+}
+
+.rest-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+  max-width: 50%;
 }
 </style>
