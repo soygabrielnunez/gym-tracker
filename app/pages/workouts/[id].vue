@@ -65,10 +65,11 @@
                     inputmode="numeric"
                     v-model.number="exercise.targetSetsMin"
                     class="input target-input"
-                    placeholder="Min"
+                    :placeholder="exercise.showSetsRange ? 'Min' : 'Series'"
                     min="1"
                   />
                   <input
+                    v-if="exercise.showSetsRange"
                     type="number"
                     inputmode="numeric"
                     v-model.number="exercise.targetSetsMax"
@@ -76,6 +77,16 @@
                     placeholder="Max"
                     min="1"
                   />
+                  <button
+                    v-else
+                    class="btn-icon"
+                    @click="exercise.showSetsRange = true"
+                    title="Añadir rango de series"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                  </button>
                 </div>
             </div>
             <div class="target-field">
@@ -86,10 +97,11 @@
                   inputmode="numeric"
                   v-model.number="exercise.targetRepsMin"
                   class="input target-input"
-                  placeholder="Min"
+                  :placeholder="exercise.showRepsRange ? 'Min' : 'Reps'"
                   min="1"
                 />
                 <input
+                  v-if="exercise.showRepsRange"
                   type="number"
                   inputmode="numeric"
                   v-model.number="exercise.targetRepsMax"
@@ -97,6 +109,16 @@
                   placeholder="Max"
                   min="1"
                 />
+                <button
+                  v-else
+                  class="btn-icon"
+                  @click="exercise.showRepsRange = true"
+                  title="Añadir rango de repeticiones"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                </button>
               </div>
             </div>
             <div class="target-field">
@@ -175,7 +197,9 @@ const addExercise = () => {
     targetRepsMin: 10,
     targetRepsMax: null,
     targetWeight: 0,
-    notes: ''
+    notes: '',
+    showSetsRange: false,
+    showRepsRange: false,
   })
 }
 
@@ -288,8 +312,12 @@ const saveWorkout = () => {
 
 .range-input-group {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr auto;
   gap: 4px;
+}
+.range-input-group .btn-icon {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
 }
 
 @media (max-width: 360px) {
