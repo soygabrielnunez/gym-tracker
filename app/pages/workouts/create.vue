@@ -59,23 +59,45 @@
           <div class="exercise-targets">
             <div class="target-field">
               <label class="label-sm">Series</label>
-              <input 
-                type="number" 
-                inputmode="numeric"
-                v-model.number="exercise.targetSets" 
-                class="input target-input"
-                min="1"
-              />
+                <div class="range-input-group">
+                  <input
+                    type="number"
+                    inputmode="numeric"
+                    v-model.number="exercise.targetSetsMin"
+                    class="input target-input"
+                    placeholder="Min"
+                    min="1"
+                  />
+                  <input
+                    type="number"
+                    inputmode="numeric"
+                    v-model.number="exercise.targetSetsMax"
+                    class="input target-input"
+                    placeholder="Max"
+                    min="1"
+                  />
+                </div>
             </div>
             <div class="target-field">
               <label class="label-sm">Reps</label>
-              <input 
-                type="number" 
-                inputmode="numeric"
-                v-model.number="exercise.targetReps" 
-                class="input target-input"
-                min="1"
-              />
+              <div class="range-input-group">
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  v-model.number="exercise.targetRepsMin"
+                  class="input target-input"
+                  placeholder="Min"
+                  min="1"
+                />
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  v-model.number="exercise.targetRepsMax"
+                  class="input target-input"
+                  placeholder="Max"
+                  min="1"
+                />
+              </div>
             </div>
             <div class="target-field">
               <label class="label-sm">Kg</label>
@@ -131,8 +153,10 @@ const exercises = ref<any[]>([])
 const addExercise = () => {
   exercises.value.push({
     name: '',
-    targetSets: 3,
-    targetReps: 10,
+    targetSetsMin: 3,
+    targetSetsMax: null,
+    targetRepsMin: 10,
+    targetRepsMax: null,
     targetWeight: 0,
     notes: ''
   })
@@ -243,6 +267,11 @@ const saveWorkout = () => {
 .target-field {
   display: flex;
   flex-direction: column;
+}
+
+.range-input-group {
+  display: flex;
+  gap: 4px;
 }
 
 .target-input {

@@ -38,7 +38,20 @@
            
            <h1 class="exercise-title">{{ currentExercise.name }}</h1>
            <div class="target-summary text-muted">
-              Objetivo: {{ currentExercise.targetSets || 3 }} series × {{ currentExercise.targetReps || 10 }} reps
+              Objetivo:
+              <span v-if="currentExercise.targetSetsMin || currentExercise.targetSetsMax">
+                {{ currentExercise.targetSetsMin || currentExercise.targetSets }} - {{ currentExercise.targetSetsMax || currentExercise.targetSets }} series
+              </span>
+              <span v-else>
+                {{ currentExercise.targetSets || 3 }} series
+              </span>
+              ×
+              <span v-if="currentExercise.targetRepsMin || currentExercise.targetRepsMax">
+                {{ currentExercise.targetRepsMin || currentExercise.targetReps }} - {{ currentExercise.targetRepsMax || currentExercise.targetReps }} reps
+              </span>
+              <span v-else>
+                {{ currentExercise.targetReps || 10 }} reps
+              </span>
            </div>
 
             <!-- Sets Progress Bar -->
@@ -298,7 +311,7 @@ watch(() => activeSession.value?.currentExerciseIndex, () => {
 const initCurrentExerciseDefaults = () => {
     if (!currentExercise.value) return
     if (currentExercise.value.currentWeight === undefined) currentExercise.value.currentWeight = currentExercise.value.targetWeight || 0
-    if (currentExercise.value.currentReps === undefined) currentExercise.value.currentReps = currentExercise.value.targetReps || 10
+    if (currentExercise.value.currentReps === undefined) currentExercise.value.currentReps = currentExercise.value.targetRepsMin || currentExercise.value.targetReps || 10
 }
 
 onUnmounted(() => {
