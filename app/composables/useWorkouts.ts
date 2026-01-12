@@ -57,6 +57,24 @@ export const useWorkouts = () => {
             }
             activeSession.value = session
         }
+
+        // MIGRATION: From targetSets/Reps to range
+        const migrateExercise = (ex: any) => {
+            if (ex.targetSets !== undefined && ex.targetSetsMin === undefined) {
+                ex.targetSetsMin = ex.targetSets
+                delete ex.targetSets
+            }
+            if (ex.targetReps !== undefined && ex.targetRepsMin === undefined) {
+                ex.targetRepsMin = ex.targetReps
+                delete ex.targetReps
+            }
+        }
+
+        workouts.value.forEach(w => w.exercises.forEach(migrateExercise))
+        if (activeSession.value) {
+            activeSession.value.exercises.forEach(migrateExercise)
+        }
+
     })
 
     // Save changes watcher
