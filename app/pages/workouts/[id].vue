@@ -287,8 +287,18 @@ const saveWorkout = () => {
 }
 
 .range-input-group {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 4px;
+}
+
+@media (max-width: 360px) {
+  .exercise-targets {
+    grid-template-columns: 1fr 1fr;
+  }
+  .range-input-group {
+    grid-template-columns: 1fr;
+  }
 }
 
 .target-input {
