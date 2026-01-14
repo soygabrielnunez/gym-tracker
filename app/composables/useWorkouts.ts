@@ -9,11 +9,39 @@ export const useWorkouts = () => {
     onMounted(() => {
         // Workouts
         const savedWorkouts = localStorage.getItem('gym-workouts')
-        if (savedWorkouts) workouts.value = JSON.parse(savedWorkouts)
+        if (savedWorkouts) {
+            const parsedWorkouts = JSON.parse(savedWorkouts)
+            // MIGRATION: Ensure new range properties exist on exercises
+            parsedWorkouts.forEach((w: any) => {
+                if (w.exercises && w.exercises.length > 0) {
+                    w.exercises.forEach((ex: any) => {
+                        if (ex.targetSetsMin === undefined) ex.targetSetsMin = null
+                        if (ex.targetSetsMax === undefined) ex.targetSetsMax = null
+                        if (ex.targetRepsMin === undefined) ex.targetRepsMin = null
+                        if (ex.targetRepsMax === undefined) ex.targetRepsMax = null
+                    })
+                }
+            })
+            workouts.value = parsedWorkouts
+        }
 
         // History
         const savedHistory = localStorage.getItem('gym-history')
-        if (savedHistory) history.value = JSON.parse(savedHistory)
+        if (savedHistory) {
+            const parsedHistory = JSON.parse(savedHistory)
+            // MIGRATION: Ensure new range properties exist on exercises in history
+            parsedHistory.forEach((s: any) => {
+                if (s.exercises && s.exercises.length > 0) {
+                    s.exercises.forEach((ex: any) => {
+                        if (ex.targetSetsMin === undefined) ex.targetSetsMin = null
+                        if (ex.targetSetsMax === undefined) ex.targetSetsMax = null
+                        if (ex.targetRepsMin === undefined) ex.targetRepsMin = null
+                        if (ex.targetRepsMax === undefined) ex.targetRepsMax = null
+                    })
+                }
+            })
+            history.value = parsedHistory
+        }
 
         // Active Session (with migration for sessionNotes)
         const savedSession = localStorage.getItem('gym-active-session')
@@ -29,6 +57,24 @@ export const useWorkouts = () => {
             }
             activeSession.value = session
         }
+
+        // MIGRATION: From targetSets/Reps to range
+        const migrateExercise = (ex: any) => {
+            if (ex.targetSets !== undefined && ex.targetSetsMin === undefined) {
+                ex.targetSetsMin = ex.targetSets
+                delete ex.targetSets
+            }
+            if (ex.targetReps !== undefined && ex.targetRepsMin === undefined) {
+                ex.targetRepsMin = ex.targetReps
+                delete ex.targetReps
+            }
+        }
+
+        workouts.value.forEach(w => w.exercises.forEach(migrateExercise))
+        if (activeSession.value) {
+            activeSession.value.exercises.forEach(migrateExercise)
+        }
+
     })
 
     // Save changes watcher
